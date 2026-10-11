@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>RB Group — Agribusiness Simulator</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--bg:#0d1218;--p1:#131a22;--p2:#19222c;--bd:#26313d;--tx:#dce4ec;--mu:#8496a8;--ac:#4f9bd6;--g:#4fb386;--w:#dfa63a;--b:#df5f4e;--o:#9a86e0}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font:12.5px/1.4 'Segoe UI',Inter,system-ui,sans-serif}
+#app{display:grid;grid-template-columns:1fr 440px;grid-template-rows:46px minmax(0,1fr) 62px;height:100vh}
+#top{grid-column:1/3;display:flex;align-items:center;gap:26px;padding:0 16px;background:var(--p1);border-bottom:1px solid var(--bd);white-space:nowrap}
+.logo{font-weight:700;letter-spacing:.14em;color:#fff}
+.kpi{display:flex;flex-direction:column;line-height:1.15}.kpi i{font-style:normal;font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.08em}.kpi b{font-size:13.5px;font-weight:600}.kpi b.neg{color:var(--b)}
+#view{position:relative;min-height:0;touch-action:none}#cv{width:100%;height:100%;display:block;touch-action:none;user-select:none;-webkit-user-select:none}
+#tip{position:absolute;left:12px;top:12px;background:#0b1016e8;border:1px solid var(--bd);padding:7px 10px;border-radius:6px;pointer-events:none;max-width:300px;display:none}
+#hint{position:absolute;right:12px;bottom:8px;color:#ffffffa0;font-size:11px;pointer-events:none;text-shadow:0 1px 2px #000}
+#toasts{position:absolute;left:12px;bottom:12px;display:flex;flex-direction:column;gap:8px;width:370px;pointer-events:none}
+.toast{display:flex;gap:8px;align-items:flex-end;animation:in .25s ease;pointer-events:auto}
+.av{width:38px;height:38px;border-radius:50%;background:#2a3b4d;flex:none;overflow:hidden;border:2px solid #3b5068}.av svg{width:100%;height:100%;display:block}
+.bub{background:#f3f5f7;color:#16202b;border-radius:12px 12px 12px 2px;padding:7px 11px;box-shadow:0 5px 16px #000a;border-left:4px solid var(--ac);font-size:12px}
+.bub small{color:#5b6b7b;display:block;font-size:10.5px;margin-bottom:1px}.bub a{color:#1b6fb0;cursor:pointer;font-weight:600;display:inline-block;margin-top:3px}
+.toast.good .bub{border-color:var(--g)}.toast.warn .bub{border-color:var(--w)}.toast.bad .bub{border-color:var(--b)}.toast.offer .bub{border-color:var(--o)}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+#side{background:var(--p1);border-left:1px solid var(--bd);display:flex;flex-direction:column;min-height:0}
+#tabs{display:flex;border-bottom:1px solid var(--bd);overflow-x:auto;flex:none}
+#tabs button{flex:0 0 auto;border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--mu);padding:9px 10px;font-size:11px;position:relative;white-space:nowrap}
+#tabs button.on{color:#fff;border-color:var(--ac);background:var(--p2)}
+.bd{font-style:normal;background:var(--o);color:#fff;border-radius:8px;font-size:10px;padding:0 5px;margin-left:3px}
+#pane{flex:1;overflow:auto;padding:10px;min-height:0}
+#bot{grid-column:1/3;display:flex;gap:12px;align-items:center;padding:6px 16px;background:var(--p1);border-top:1px solid var(--bd)}
+#bot .av{width:42px;height:42px}
+#log{flex:1;font-size:11.5px;color:var(--mu);overflow:hidden;height:100%;display:flex;flex-direction:column;justify-content:center}#log div:first-child{color:var(--tx)}#log div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#spd{display:flex;gap:4px}
+button{background:#1d2935;color:var(--tx);border:1px solid #34475a;border-radius:4px;padding:5px 11px;cursor:pointer;font:inherit}
+button.pri{background:var(--ac);border-color:var(--ac);color:#fff}
+button:disabled{opacity:.4;cursor:not-allowed}button:hover:not(:disabled){filter:brightness(1.18)}
+.card{background:var(--p2);border:1px solid var(--bd);border-radius:6px;padding:8px 10px;margin-bottom:7px}.card.sel{border-color:var(--w)}.card.offer{border-left:3px solid var(--o)}
+.r{display:flex;justify-content:space-between;gap:8px;margin-bottom:3px}.sm{color:var(--mu);font-size:11px;margin-bottom:4px}
+table{width:100%;border-collapse:collapse}td,th{padding:4px 2px;border-bottom:1px solid var(--bd);text-align:left;font-weight:400}th{color:var(--mu);font-size:10.5px}td:last-child{text-align:right}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:7px 0}.stats>div{background:var(--p1);border:1px solid var(--bd);border-radius:4px;padding:6px 7px;min-width:0}.stats span{display:block;color:var(--mu);font-size:10px;margin-bottom:3px}.stats b{display:block;font-size:13px;overflow-wrap:anywhere}.pos{color:var(--g)}.neg{color:var(--b)}h4{margin:10px 0 4px;color:var(--mu);font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;font-weight:600}label{display:block;margin:5px 0}
+.msg{border-left:3px solid var(--ac);background:var(--p2);padding:5px 8px;margin-bottom:6px;border-radius:0 4px 4px 0}.msg.good{border-color:var(--g)}.msg.warn{border-color:var(--w)}.msg.bad{border-color:var(--b)}.msg.offer{border-color:var(--o)}
+
+#socialTicker{display:none!important}
+.social-bubble{display:flex;align-items:center;gap:5px;background:#111a;border:1px solid #ffffff20;color:#e9edf2;border-radius:12px;padding:4px 7px;margin-bottom:4px;font-size:10px;line-height:1.2;box-shadow:0 2px 8px #0002;backdrop-filter:blur(3px);animation:socialIn .35s ease}
+.social-bubble .social-icon{font-size:11px;font-weight:700;width:14px;text-align:center;flex:none}
+.social-bubble .social-copy{overflow-wrap:anywhere}
+@keyframes socialIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+#modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:9}
+#modal .box{background:var(--p1);border:1px solid var(--bd);border-radius:10px;padding:22px 26px;width:640px;max-width:94vw;max-height:88vh;overflow:auto}
+#modal h2{margin-bottom:8px;font-weight:600}#modal ol{margin:8px 0 14px 18px}#modal li{margin-bottom:6px}
+
+#camBtns{position:absolute;right:12px;bottom:28px;display:flex;gap:6px;z-index:3}#camBtns button{padding:4px 9px;font-size:11px;background:#0b1016cc}#camBtns .zoom{font-size:15px;min-width:30px;padding:3px 8px}
+#chatRoot{display:flex;flex-direction:column;height:100%;min-height:0;gap:6px}
+.ct{display:flex;flex-wrap:wrap;gap:4px}.ct button{padding:3px 8px;font-size:11px;border-radius:12px}.ct button.on{background:var(--ac);border-color:var(--ac);color:#fff}
+#chatHead{display:flex;align-items:center;gap:8px;padding:4px 2px;border-bottom:1px solid var(--bd)}
+#chatBox{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:6px;padding:4px 2px}
+.cm{max-width:90%;padding:6px 9px;border-radius:10px;font-size:12px;white-space:pre-wrap;word-break:break-word}
+.cm.me{align-self:flex-end;background:#2d6aa3;color:#fff;border-bottom-right-radius:2px}
+.cm.tm{align-self:flex-start;background:var(--p2);border:1px solid var(--bd);border-bottom-left-radius:2px}.cm b{display:block;font-size:10.5px;margin-bottom:2px}
+#chatQ{display:flex;flex-wrap:wrap;gap:4px}#chatQ button{font-size:10.5px;padding:3px 7px;border-radius:10px;color:var(--mu)}
+#chatRow{display:flex;gap:6px}#chatRow input{flex:1;background:#0d1218;color:var(--tx);border:1px solid #34475a;border-radius:4px;padding:7px 8px;font:inherit}
+
+/* Responsive/mobile layout + collapsible controls */
+#quickBtns{position:absolute;left:10px;top:10px;z-index:12;display:flex;gap:6px;flex-wrap:wrap;max-width:calc(100% - 20px)}
+#quickBtns button{background:#0b1016e8;border-color:#607487;padding:7px 10px;font-size:12px;box-shadow:0 2px 8px #0005}
+#app.panel-hidden{grid-template-columns:1fr}
+#app.panel-hidden #side{display:none}
+#app.hud-hidden{grid-template-rows:0 minmax(0,1fr) 0}
+#app.hud-hidden #top,#app.hud-hidden #bot{display:none}
+#app.hud-hidden #view{grid-row:1/4}
+#side{min-width:0}
+button{min-height:30px;touch-action:manipulation}
+@media(max-width:760px){
+ html,body{height:100%;height:100dvh;font-size:13px}
+ #app{position:relative;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:52px minmax(0,1fr) 58px;height:100vh;height:100dvh;width:100%;overflow:hidden}
+ #top{grid-column:1;gap:12px;padding:0 10px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+ #top::-webkit-scrollbar{display:none}
+ .logo{font-size:12px;flex:none}
+ .kpi{flex:none}.kpi i{font-size:9px}.kpi b{font-size:12px}
+ #top button{flex:none;font-size:11px;padding:5px 8px}
+ #view{grid-column:1;grid-row:2;min-height:0;width:100%;overflow:hidden}
+ #side{position:absolute;z-index:8;left:7px;right:7px;bottom:66px;height:45dvh;max-height:58dvh;min-height:190px;border:1px solid var(--bd);border-radius:9px;box-shadow:0 8px 28px #0009;overflow:hidden}
+ #tabs{overflow-x:auto;scrollbar-width:thin}
+ #tabs button{padding:10px 9px;font-size:11px;min-height:39px}
+ #pane{padding:8px;overscroll-behavior:contain}
+ .card{padding:9px;margin-bottom:7px}
+ #bot{grid-column:1;grid-row:3;gap:5px;padding:5px 7px;min-width:0;overflow:hidden}
+ #bot .av{width:30px;height:30px;flex:none}
+ #log{font-size:10px;min-width:0}
+ #spd{gap:3px;flex:none;overflow-x:auto;max-width:31vw}
+ #spd button{padding:5px 7px;font-size:10px;flex:none}
+ #bot>button{font-size:10px;padding:5px 7px;flex:none}
+ #camBtns{left:8px;right:8px;bottom:8px;gap:5px;max-width:calc(100% - 16px);overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:none;padding:3px;justify-content:flex-start}
+ #camBtns::-webkit-scrollbar{display:none}
+ #camBtns button{flex:none;min-height:34px;font-size:11px;padding:6px 9px}
+ #camBtns .zoom{font-size:17px;min-width:36px}
+ #hint{display:none}
+ #toasts{left:8px;bottom:52px;width:min(340px,calc(100% - 16px));max-height:30%;overflow:hidden}
+ .toast{max-width:100%}.bub{font-size:11px;padding:6px 8px}
+ #modal{padding:10px}
+ #modal .box{width:100%;max-width:100%;max-height:90dvh;padding:16px}
+ #chatRoot{height:100%}
+ #chatQ{max-height:72px;overflow:auto}
+ #chatRow input{min-width:0}
+ table{font-size:11px}td,th{padding:5px 3px}
+}
+@media(max-width:390px){
+ #top{gap:9px;padding:0 7px}
+ #bot .av{display:none}
+ #log{max-width:27vw}
+ #spd{max-width:35vw}
+ #bot>button{padding:5px 5px}
+ .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style></head><body>
+<div id="app">
+ <div id="top"><span class="logo">RB GROUP</span>
+  <span class="kpi"><i>Date &amp; time</i><b id="hW"></b></span><span class="kpi"><i>Year</i><b id="hY"></b></span>
+  <span class="kpi"><i>Cash</i><b id="hC"></b></span><span class="kpi"><i>Loan</i><b id="hL"></b></span><span class="kpi"><i>Net worth</i><b id="hN"></b></span>
+  <button style="margin-left:auto" onclick="tab=6;ui()">💬 Team chat</button><button onclick="showHelp()">How to play</button></div>
+ <div id="view"><div id="quickBtns"><button id="panelBtn" onclick="togglePanel()">📋 Open panel</button><button id="hudBtn" onclick="toggleHUD()">↕ Minimise HUD</button></div><canvas id="cv"></canvas><div id="tip"></div><div id="toasts"></div><div id="socialTicker" aria-label="Simulated public reviews"></div><div id="hint">Drag: rotate · Right-drag or Shift-drag: pan · Wheel: zoom · Click a zone</div><div id="camBtns"><button onclick="flyTo(0,22,300)">Whole farm</button><button onclick="flyTo(-8,112,130)">Gate &amp; shops</button><button onclick="flyTo(TX,TZ,75)">Guest stay</button><button onclick="flyTo(118,SHOP_Z0+8,105)">Village lounge</button><button onclick="flyTo(162,SHOP_Z0+15,48)">Bottling plant</button><button class="zoom" aria-label="Zoom in" title="Zoom in" onclick="zoomBy(.8)">+</button><button class="zoom" aria-label="Zoom out" title="Zoom out" onclick="zoomBy(1.25)">−</button></div></div>
+ <div id="side"><div id="tabs"></div><div id="pane"></div></div>
+ <div id="bot"><div class="av" id="mav"></div><div id="log"></div><div id="spd"></div>
+  <button onclick="save();note('info','Saved','Game saved.')">Save</button>
+  <button onclick="if(confirm('Reset the whole game?')){localStorage.removeItem(KEY);location.reload()}">Reset</button></div>
+</div>
+<div id="modal"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ===================== CONFIG — EDIT HERE ===================== */
+const ACRE=4046.86,MARK=1.28,KEY='rbgroup_v2';
+const GAME_VAT_RATE=.002, SALE_LOAN_RATE=.01;
+const CFG={cash:6000000,wage:3500,adminStaff:4,baseUtil:3500,tax:.002,taxEvery:13,loanRate:.12,loanMax:5000000,licFee:1200000,
+ // Land (acres). Poultry 0.50 is a PLACEHOLDER so the total is 6.00 — change when you have the real figure.
+ manager:'Mr. Karim',acres:{fishery:2.5,agri:1.35,dairy:.65,poultry:.5,feed:.35,util:.2,admin:.2,store:.25}};
+const ZN={fishery:'Fishery',agri:'Agriculture',dairy:'Dairy & Livestock',poultry:'Poultry',feed:'Feed & Processing',util:'Utilities & Biogas',admin:'Administration',store:'Warehouse & Storage'};
+const COLS=[['fishery'],['agri','dairy'],['poultry','feed','util','admin','store']]; // map layout (west → east)
+/* Enterprises: cap = build cost, cyc = production cycle (weeks), seed = cost per cycle, feed = kg/week, staff = heads, run = weekly running cost */
+const E={
+ fish:{n:'Fish ponds',cap:350000,max:4,cyc:18,seed:90000,feed:49,staff:.5,out:['fish',2600],start:2,run:0},
+ crop:{n:'Crop plots (0.2 ac)',cap:60000,max:6,cyc:8,seed:22000,feed:0,staff:.5,out:['veg',1600],start:2,run:0},
+ dairy:{n:'Dairy cows',cap:130000,max:20,feed:17.5,staff:.25,start:4,run:600},
+ poul:{n:'Layer sheds (500 birds)',cap:250000,max:6,feed:135,staff:.7,start:1,run:4500},
+ mill:{n:'Feed-mill lines',cap:800000,max:3,feed:0,staff:2,start:0,run:6000},
+ bio:{n:'Biogas digesters',cap:500000,max:3,feed:0,staff:.5,start:0,run:1500},
+ store:{n:'Cold/dry stores (20 t)',cap:400000,max:5,feed:0,staff:1,start:0,run:500},
+ shop:{n:'Supermarkets',cap:350000,max:3,feed:0,staff:2,start:1,run:1200}};
+const P={fish:{n:'Fish',u:'kg',b:175,d:4000,cap:600,sp:.03},veg:{n:'Vegetables',u:'kg',b:45,d:3000,cap:700,sp:.02},milk:{n:'Milk',u:'L',b:75,d:2500,cap:900,sp:.15},egg:{n:'Eggs',u:'pcs',b:11,d:12000,cap:3000,sp:.01},eggTray:{n:'Packaged egg tray (30 eggs)',u:'tray',b:420,d:500,cap:120,sp:.01},frozenFish:{n:'Packed fish',u:'kg pack',b:225,d:500,cap:80,sp:.04}};
+const KG={fish:1,veg:1,milk:1.03,egg:.06,eggTray:1.8,frozenFish:1},BASEP={feed:50,raw:34,gas:45};
+const ZE={fishery:'fish',agri:'crop',dairy:'dairy',poultry:'poul',feed:'mill',util:'bio',store:'store'},EZ={};for(const z in ZE)EZ[ZE[z]]=z;
+
+/* ===================== MAP LAYOUT (exact acreage → m²) ===================== */
+// Modelled on the reference aerial photo: walled compound with watch-towers, one arched gate on the south side,
+// a main road running north from the gate, farmland across the north, utilities/dairy/poultry/admin on the west,
+// ponds + feed mill + warehouse on the east, and a landscaped gate plaza (parking, guest cottage, palms).
+// Every productive zone keeps its EXACT acreage (total 6.00 ac); the gate plaza is extra landscaped space.
+const TA=Object.values(CFG.acres).reduce((a,b)=>a+b,0),FW=150,PL=30,Z={};
+const BAND=CFG.acres.agri*ACRE/FW,REST=(TA-CFG.acres.agri)*ACRE/FW,FHt=BAND+REST+PL,WN=-FHt/2,WS=FHt/2,ZAB=WN+BAND,ZBOT=ZAB+REST;
+const LCOL=['util','dairy','poultry','admin'],RCOL=['fishery','feed','store'];
+const WL=LCOL.reduce((s,k)=>s+CFG.acres[k],0)*ACRE/REST,XR=-FW/2+WL;
+Z.agri={x:-FW/2,z:WN,w:FW,h:BAND,cx:0,cz:WN+BAND/2};
+[[LCOL,-FW/2,WL],[RCOL,XR,FW-WL]].forEach(([col,x0,w])=>{let z0=ZAB;col.forEach(k=>{const h=CFG.acres[k]*ACRE/w;Z[k]={x:x0,z:z0,w,h,cx:x0+w/2,cz:z0+h/2};z0+=h})});
+const TX=-58,TZ=ZBOT+13.1,TOURP={x:TX-12,z:TZ-9.5,w:24,h:19,cx:TX,cz:TZ};
+// roads, lanes (left-hand traffic), shops, parking lot, vehicle docks
+const RD_Z=WS+10,LE=RD_Z-2.2,LW=RD_Z+2.2,NL=XR-1.5,SL=XR+1.5;
+const SHOPX=[-50,0,50],SHOP_Z0=WS+37,SHOP_FRONT=SHOP_Z0-9,SWZ=WS+16.4;
+const LOTX0=-22,LOTX1=38,LOTZ0=ZBOT+3,LOTZ1=WS-3,LOT_AZ=(LOTZ0+LOTZ1)/2,BAYX=[-12,-4.5,3,10.5,18,25.5,33],ROWZ=[LOTZ0+5.5,LOTZ1-5.5];
+const STAT_BAYS=[[0,1],[0,4],[0,6],[1,0],[1,3],[1,5]];
+const DOCK={};for(const k in Z)DOCK[k]={s:Z[k].x<XR?-1:1,z:Z[k].cz,bd:9};
+DOCK.agri={s:1,z:ZAB,bd:9};DOCK.util.bd=6.5;DOCK.tour={s:-1,z:ZBOT+12,bd:9};
+
+/* ===================== STATE ===================== */
+const $=id=>document.getElementById(id),R_=Math.random;
+const BDT=n=>(n<0?'-':'')+'৳'+Math.round(Math.abs(n)).toLocaleString('en-IN');
+let S,sel=null,tab=0,modal=0;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));S.lastLocalSave=Date.now()}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.u&&s.inv)return s}catch(e){}return null}
+
+/* ===================== TIME, MANAGER & ENGINE ===================== */
+/* At the default 600× setting, one in-game week takes 10 real minutes. */
+const TIME={base:1.68,speeds:[0,1,30,150,600,2400],def:4};
+const DAYN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+// The simulator calendar starts on Monday, 5 January 2026.
+const GAME_START=new Date(Date.UTC(2026,0,5));
+function gameDate(offset){const d=new Date(GAME_START);d.setUTCDate(d.getUTCDate()+Math.max(0,Math.floor(offset||0)));return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'});}
+function gameDayDate(offset){const n=Math.max(0,Math.floor(offset||0));return DAYN[n%7]+' · '+gameDate(n);}
+function harvestInfo(k){const e=E[k], units=S.u[k]||[];const growing=units.map((u,i)=>({u,i,days:u.p>=0?Math.max(0,Math.ceil((e.cyc-u.p)*7-1e-7)):null})).filter(x=>x.days!==null).sort((a,b)=>a.days-b.days);return {growing,first:growing.length?growing[0].days:null};}
+function harvestSchedule(k){const e=E[k],label=k==='crop'?'Vegetables':'Fish',h=harvestInfo(k),lines=[];if(!S.u[k].length)return '<div class=sm>'+label+': no production units built yet.</div>';S.u[k].forEach((u,i)=>{if(u.p>=0){const days=Math.max(0,Math.ceil((e.cyc-u.p)*7-1e-7));lines.push('<div class=sm><b>'+label+' unit #'+(i+1)+'</b> — expected '+gameDayDate(S.dayDone+days)+' ('+days+' day'+(days===1?'':'s')+' left)</div>')}else lines.push('<div class=sm><b>'+label+' unit #'+(i+1)+'</b> — idle; '+(S.auto?'auto-restock will replant it':'restock it to start the next cycle')+'</div>')});return lines.join('');}
+
+const CL=['Dhaka Fresh Traders','Bengal Cold Chain Ltd','Meghna Agro Exports','Padma Foods Ltd','Jamuna Retail Group','Sylhet Provisions','Karnaphuli Seafood Co.','Surma Energy Partners'];
+const AV='<svg viewBox="0 0 40 40"><rect width="40" height="40" fill="#2a3b4d"/><circle cx="20" cy="15" r="7" fill="#e0b894"/><path d="M13 12c1-7 13-7 14 0-3-3-11-3-14 0z" fill="#20252b"/><path d="M5 40c0-9 6-14 15-14s15 5 15 14z" fill="#1f3a5a"/><path d="M16 26l4 5 4-5z" fill="#fff"/><path d="M19 28h2l1 8-2 2-2-2z" fill="#b23a3a"/></svg>';
+const fmt=n=>Math.round(n).toLocaleString('en-IN');
+const BDTshort=n=>{const a=Math.abs(Number(n)||0),v=a>=1e7?(a/1e7).toFixed(a>=1e8?0:1)+'Cr':a>=1e5?(a/1e5).toFixed(a>=1e6?0:1)+'L':a>=1e3?(a/1e3).toFixed(a>=1e4?0:1)+'K':Math.round(a).toString();return (n<0?'-':'')+'৳'+v};
+const TIPS=[[1,'Open the Operations tab: ponds and plots show their cycle progress. Auto-restock keeps them running.'],
+ [2,'Milk and eggs are produced daily. Spot-market sales need your approval; protect fresh stock with cold storage or sell it promptly.'],
+ [4,'Watch the Offers tab. Clients ask to store goods, buy your produce, or buy biogas. Accept only what you can deliver.'],
+ [8,'Feed use has been reduced for a more forgiving start. Watch the Manager tab for low-stock warnings and cash-aware advice.'],
+ [14,'Review Finance weekly. Wages and running costs are charged every week and income tax every quarter.']];
+
+function fresh(){const u={};let cp=0;for(const k in E){u[k]=[];for(let i=0;i<E[k].start;i++){u[k].push({p:E[k].cyc?(i?4:12):0,y:1});cp+=E[k].cap}}
+ return{cash:CFG.cash,week:1,t:360,dayDone:0,speed:TIME.def,prevSpeed:TIME.def,loan:0,capex:cp,inv:{fish:0,veg:0,milk:0,egg:0,eggTray:0,frozenFish:0,feed:2000},hold:{},
+ pr:{fish:175,veg:45,milk:75,egg:11,feed:50,raw:34,gas:45},u,lic:0,auto:1,rent:1,qrev:0,qcost:0,rep:{r:{},c:{}},prev:null,hist:[CFG.cash],fl:{},over:0,won:0,
+ offers:[],contracts:[],notes:[],salesLog:[],chat:[],unread:0,seen:0,cool:{},nid:1,tip:0,solar:{arrays:0,price:18,capacityPerArray:80,costPerArrayDay:250,lifeSales:0,lifeCosts:0,energyUsed:0},ai:{energy:1,accountant:1,autoPrice:1,costGuard:1},shopData:{stock:{egg:500,milk:180,fish:80,veg:150,eggTray:0,bottledMilk:0,bottledWater:0},prices:{egg:16,milk:105,fish:245,veg:70,eggTray:450,bottledMilk:125,bottledWater:30},sales:[],requests:[],totalSales:0,totalProfit:0,externalStock:{rice:120,oil:80,soap:90,snacks:120},externalSales:0,commission:0,externalRequests:[]},marketing:{reputation:20,customers:0,campaigns:0,salesBoost:0},tourism:{built:0,license:0,guests:0,reviews:[],income:0,booking:null,requests:[],nextId:1},village:{occupiedShops:3,totalShops:4,rentPerShop:3500,milkBottles:0,waterBottles:0,milkProduced:0,waterProduced:0,milkSales:0,waterSales:0,cafeSales:0,cafeCosts:0,rentIncome:0,rentAccrued:0,lastRentPaid:0,rentPayments:0,visitorsToday:0,visitorsTotal:0,footfallEstimate:0}}}
+
+function note(ty,title,text,go){S.notes.unshift({ty,title,text,t:S.t,go});if(S.notes.length>80)S.notes.length=80;if(tab!=5)S.unread++;toast(S.notes[0])}
+const lg=(t,ty,ti,go)=>note(ty||'info',ti||'',t,go);
+
+// Single accounting gateway: every positive revenue posted through rev() gets VAT accrued and, while a loan is outstanding, the automatic 1% principal deduction. This includes shop sales, commissions, farm sales/contracts, rent, café, accommodation, tourism, storage, feed and biogas.
+const rev=(l,a)=>{a=Number(a);if(!Number.isFinite(a)||a<=0)return {repayment:0,vat:0};S.cash=(Number(S.cash)||0)+a;S.qrev=(Number(S.qrev)||0)+a;S.monthGross=(Number(S.monthGross)||0)+a;S.dailyGrossSales=(Number(S.dailyGrossSales)||0)+a;S.rep.r[l]=(Number(S.rep.r[l])||0)+a;const levy=a*GAME_VAT_RATE;S.legal=S.legal||{};S.legal.vatAccrued=(S.legal.vatAccrued||0)+levy;S.dailyVatAccrued=(Number(S.dailyVatAccrued)||0)+levy;S.qcost=(Number(S.qcost)||0)+levy;S.rep.c['Simulated VAT accrued (0.2% of all recorded revenue)']=(S.rep.c['Simulated VAT accrued (0.2% of all recorded revenue)']||0)+levy;let repayment=0;if((Number(S.loan)||0)>0){repayment=Math.min(Number(S.loan)||0,a*SALE_LOAN_RATE);if(repayment>0){S.loan=Math.max(0,S.loan-repayment);S.cash-=repayment;S.loanPrincipalRepaidTotal=(Number(S.loanPrincipalRepaidTotal)||0)+repayment;S.rep.c['Automatic loan principal repayment (1% of sale)']=(S.rep.c['Automatic loan principal repayment (1% of sale)']||0)+repayment;S.loanRepayments=S.loanRepayments||[];S.loanRepayments.unshift({day:S.dayDone,week:S.week,label,amount:repayment,gross:a});S.loanRepayments=S.loanRepayments.slice(0,100);}}S._lastRevenueSettlement={label:String(l),gross:a,repayment,vat:levy};return {repayment,vat:levy};};
+// Existing sales call this after rev() to display the deduction in receipts. It now reads the result already posted centrally and never deducts twice.
+function settleCompletedSale(label,gross){const amount=Math.max(0,Number(gross)||0),last=S._lastRevenueSettlement;if(last&&Math.abs(last.gross-amount)<0.005)return {repayment:last.repayment,vat:last.vat};return {repayment:0,vat:amount*GAME_VAT_RATE};}
+const isPrincipalRepaymentLabel=l=>/^Automatic loan principal repayment/i.test(String(l)); const reportCostsTotal=costs=>Object.keys(costs||{}).reduce((n,l)=>n+(isPrincipalRepaymentLabel(l)?0:(Number(costs[l])||0)),0); const cost=(l,a)=>{a=Number(a);if(!Number.isFinite(a)||a<=0)return;S.cash=(Number(S.cash)||0)-a;S.qcost=(Number(S.qcost)||0)+a;S.rep.c[l]=(Number(S.rep.c[l])||0)+a};
+function requestApproval(type,title,amount,details){if(!S.approvals.some(a=>a.type===type&&a.open))S.approvals.unshift({id:S.nid++,type,title,amount:Math.max(0,Math.round(amount||0)),details,open:1,day:S.dayDone});note('warn','Approval required',title+' — '+BDT(amount||0)+'. Review the Legal & Compliance section before payment.',5)}
+function approveRequest(id){const a=S.approvals.find(x=>x.id===id&&x.open);if(!a)return;if(S.cash<a.amount){note('bad','Approval blocked','Cash is too low to pay '+BDT(a.amount)+'. Raise cash first.',5);return}S.cash-=a.amount;if(a.type!=='vat'){S.qcost+=a.amount;S.rep.c[a.title]=(S.rep.c[a.title]||0)+a.amount;}a.open=0;if(R_()<.7)queueVisit({veh:'car',to:'admin',text:'Official — collecting approved payment',dwell:6}); if(a.type==='tour-license'){S.tourism.license=1;updTourLabel();note('good','Farm-stay licence approved','The cottage can now receive guest requests. Each stay needs your approval; maximum 5 guests at a time.',5)}else if(a.type==='vat'){S.legal.vatAccrued=Math.max(0,(S.legal.vatAccrued||0)-a.amount);note('good','VAT payment recorded','VAT/compliance officer recorded your approved payment.',5)}else if(a.type==='tax'){S.legal.taxAccrued=Math.max(0,(S.legal.taxAccrued||0)-a.amount);note('good','Tax payment recorded','Lawyer recorded your approved tax payment.',5)}else if(a.type==='staff-pool'){note('good','Monthly staff pool paid','Combined 2% staff pool paid once for all eligible roles.',5)}ui();hud();save()}
+function declineRequest(id){const a=S.approvals.find(x=>x.id===id&&x.open);if(a){a.open=0;note('warn','Payment held','You held '+a.title+'. The obligation remains unpaid; ask Legal & Compliance to review it.',5);ui();save()}}
+
+const n_=k=>S.u[k].length,stocked=()=>S.u.fish.filter(u=>u.p>=0).length;
+const weekUse=()=>stocked()*E.fish.feed+n_('dairy')*E.dairy.feed+n_('poul')*E.poul.feed;
+const totalKg=()=>Object.keys(P).reduce((s,k)=>s+S.inv[k]*KG[k],0);
+const nw=()=>S.cash-S.loan+S.capex*.75+Object.keys(P).reduce((s,k)=>s+S.inv[k]*S.pr[k],0)+S.inv.feed*S.pr.raw;
+const resv=k=>S.contracts.filter(c=>c.ty=='buy'&&!c.done&&c.item==k).reduce((s,c)=>s+c.qty,0);
+// Days until the next vegetable harvest; used to set realistic vegetable-order deadlines.
+const vegHarvestDays=()=>{const growing=S.u.crop.filter(u=>u.p>=0).map(u=>Math.max(1,Math.ceil((E.crop.cyc-u.p)*7)));return growing.length?Math.min(...growing): (S.auto?7:Infinity)};
+const storeKg=()=>S.contracts.filter(c=>c.ty=='store').reduce((s,c)=>s+c.tons*1000,0);
+const storeFree=()=>Math.max(0,n_('store')*20000-storeKg()-totalKg())/1000;
+const gasCommit=()=>S.contracts.filter(c=>c.ty=='gas').reduce((s,c)=>s+c.vol,0);
+const heads=()=>Math.ceil(CFG.adminStaff+Object.keys(E).reduce((s,k)=>s+n_(k)*E[k].staff,0));
+const weeklyFixed=()=>heads()*CFG.wage+CFG.baseUtil+Object.keys(E).reduce((s,k)=>s+n_(k)*E[k].run,0);
+
+/* ---- owner-controlled supermarket and guest-stay operations ---- */
+const SHOPITEMS={egg:{n:'Eggs',u:'pcs',cost:12,base:16},milk:{n:'Milk',u:'L',cost:82,base:105},fish:{n:'Fish',u:'kg',cost:195,base:245},veg:{n:'Vegetables',u:'kg',cost:55,base:70},eggTray:{n:'Packaged egg trays',u:'tray',cost:0,base:450},bottledMilk:{n:'RB Fresh Milk (1 L bottle)',u:'bottle',cost:95,base:125},bottledWater:{n:'RB Pure Water (1 L bottle)',u:'bottle',cost:15,base:30}};
+function ensureBusinessData(){
+ S.shopData=Object.assign({stock:{egg:500,milk:180,fish:80,veg:150,eggTray:0,bottledMilk:0,bottledWater:0},prices:{egg:16,milk:105,fish:245,veg:70,eggTray:450,bottledMilk:125,bottledWater:30},sales:[],requests:[],totalSales:0,totalProfit:0},S.shopData||{});
+ S.shopData.stock=Object.assign({egg:0,milk:0,fish:0,veg:0,eggTray:0,bottledMilk:0,bottledWater:0},S.shopData.stock||{});S.shopData.prices=Object.assign({egg:16,milk:105,fish:245,veg:70,eggTray:450,bottledMilk:125,bottledWater:30},S.shopData.prices||{});S.shopData.sales=Array.isArray(S.shopData.sales)?S.shopData.sales:[];S.shopData.requests=Array.isArray(S.shopData.requests)?S.shopData.requests:[];S.shopData.externalStock=Object.assign({rice:120,oil:80,soap:90,snacks:120},S.shopData.externalStock||{});S.shopData.externalRequests=Array.isArray(S.shopData.externalRequests)?S.shopData.externalRequests:[];S.shopData.externalSales=Number(S.shopData.externalSales)||0;S.shopData.commission=Number(S.shopData.commission)||0;S.marketing=Object.assign({reputation:20,customers:0,campaigns:0,salesBoost:0},S.marketing||{});
+ S.tourism=Object.assign({built:0,license:0,guests:0,reviews:[],income:0,booking:null,requests:[],nextId:1},S.tourism||{});S.tourism.requests=Array.isArray(S.tourism.requests)?S.tourism.requests:[];S.tourism.nextId=Number(S.tourism.nextId)||1;S.hospitality=Object.assign({built:{},income:0,guests:0,occupiedRoomDays:0,bookings:0,complaints:0,requests:[],stays:[],nextId:1},S.hospitality||{});S.hospitality.built=Object.assign({},S.hospitality.built||{});S.hospitality.requests=Array.isArray(S.hospitality.requests)?S.hospitality.requests:[];S.hospitality.stays=Array.isArray(S.hospitality.stays)?S.hospitality.stays:[];S.hospitality.nextId=Number(S.hospitality.nextId)||1;S.hospitality.income=Number(S.hospitality.income)||0;S.hospitality.guests=Number(S.hospitality.guests)||0;S.hospitality.occupiedRoomDays=Number(S.hospitality.occupiedRoomDays)||0;S.hospitality.bookings=Number(S.hospitality.bookings)||0;S.hospitality.complaints=Number(S.hospitality.complaints)||0;S.shopData.customersToday=Number(S.shopData.customersToday)||0;S.shopData.customersTotal=Number(S.shopData.customersTotal)||0;S.shopData._units=Number(S.shopData._units)||0;S.village=Object.assign({occupiedShops:3,totalShops:4,rentPerShop:3500,milkBottles:0,waterBottles:0,milkProduced:0,waterProduced:0,milkSales:0,waterSales:0,cafeSales:0,cafeCosts:0,rentIncome:0,rentAccrued:0,lastRentPaid:0,rentPayments:0,visitorsToday:0,visitorsTotal:0,footfallEstimate:0},S.village||{});for(const k of ['rentIncome','rentAccrued','lastRentPaid','rentPayments','visitorsToday','visitorsTotal','footfallEstimate','cafeSales','cafeCosts'])S.village[k]=Number(S.village[k])||0;if(!Number.isFinite(Number(S.village.rentPerShop))||Number(S.village.rentPerShop)<500)S.village.rentPerShop=3500;S.village.totalShops=4;S.village.occupiedShops=Math.max(0,Math.min(4,Number(S.village.occupiedShops)||0));S.village.milkPrice=Number(S.village.milkPrice)||125;S.village.waterPrice=Number(S.village.waterPrice)||30;S.shopData.prices.bottledMilk=S.village.milkPrice;S.shopData.prices.bottledWater=S.village.waterPrice;
+}
+function createShopRequest(){if(!n_('shop'))return;ensureBusinessData();if(S.shopData.requests.some(r=>r.open))return;const keys=Object.keys(SHOPITEMS).filter(k=>!['eggTray','bottledMilk','bottledWater'].includes(k)),k=keys[Math.floor(R_()*keys.length)],it=SHOPITEMS[k],qty={egg:1000,milk:250,fish:100,veg:250}[k],amount=Math.round(qty*it.cost);const r={id:S.nid++,item:k,qty,amount,open:1,day:S.dayDone};S.shopData.requests.unshift(r);note('warn','Supermarket manager — approval needed','RB Fresh Mart needs '+fmt(qty)+' '+it.u+' of '+it.n+' for '+BDT(amount)+'. Approve or decline in the Manager tab. Farm cash will only be spent if you approve.',5);ui();save()}
+function decideShopRequest(id,approve){ensureBusinessData();const r=S.shopData.requests.find(x=>x.id===id&&x.open);if(!r)return;if(approve){if(S.cash<r.amount){note('bad','Purchase blocked','Not enough cash for the supermarket order of '+BDT(r.amount)+'.',5);return}S.cash-=r.amount;S.qcost+=r.amount;S.rep.c['Supermarket inventory purchase']=(S.rep.c['Supermarket inventory purchase']||0)+r.amount;S.shopData.stock[r.item]=(S.shopData.stock[r.item]||0)+r.qty;r.open=0;queueVisit({veh:'truck',col:0xffffff,cargo:0xe9eef2,to:'shop',text:'Supplier delivery to RB Fresh Mart ('+SHOPITEMS[r.item].n+')',dwell:10});note('good','Supermarket stock approved','Purchased '+fmt(r.qty)+' '+SHOPITEMS[r.item].u+' of '+SHOPITEMS[r.item].n+'. The supermarket manager can now sell it.',5)}else{r.open=0;note('warn','Supermarket request declined','You declined '+SHOPITEMS[r.item].n+'. The manager must manage the shortage until the next request.',5)}ui();hud();save()}
+function supermarketDay(){ensureBusinessData();if(!n_('shop'))return;const d=S.shopData;const transfer=Math.min(S.inv.eggTray||0,n_('shop')*8);if(transfer>0){S.inv.eggTray-=transfer;d.stock.eggTray=(d.stock.eggTray||0)+transfer;note('info','Farm-to-store delivery',fmt(transfer)+' packaged egg trays transferred from RB farm stock to RB Fresh Mart without a supplier purchase.',5)}let revenue=0,profit=0;for(const k in SHOPITEMS){const it=SHOPITEMS[k],stock=d.stock[k]||0,qty=Math.min(stock,Math.max(0,Math.round(({egg:90,milk:18,fish:7,veg:24,eggTray:8,bottledMilk:14,bottledWater:28}[k])*n_('shop')*(.75+R_()*.5))));if(qty>0){const price=d.prices[k]||it.base,revv=qty*price,pr=qty*Math.max(0,price-it.cost);d.stock[k]-=qty;d._units=(d._units||0)+qty;revenue+=revv;profit+=pr;d.sales.unshift({day:S.dayDone,week:S.week,item:k,qty,price,revenue:revv,profit:pr});if(k==='bottledMilk')S.village.milkSales=(S.village.milkSales||0)+revv;if(k==='bottledWater')S.village.waterSales=(S.village.waterSales||0)+revv}}
+ if(revenue>0){d.totalSales+=revenue;d.totalProfit+=profit;rev('Supermarket customer sales',revenue);cost('Supermarket cost of goods sold',revenue-profit);settleCompletedSale('Supermarket customer sales',revenue)}if(d.sales.length>100)d.sales.length=100;
+ // Market prices move by product and week; managers can adjust shelf prices in the Manager tab.
+ if(S.dayDone%7===0){for(const k in SHOPITEMS){const it=SHOPITEMS[k],old=d.prices[k]||it.base;d.prices[k]=Math.max(it.cost*1.08,Math.round(old*(.94+R_()*.13)*100)/100)}if(S.dayDone%14===0){createShopRequest();createExternalRequest()}}
+}
+const EXTERNAL={rice:{n:'Packaged rice',u:'bags',price:950,commission:.10,qty:35},oil:{n:'Cooking oil',u:'bottles',price:185,commission:.10,qty:28},soap:{n:'Soap & home care',u:'packs',price:75,commission:.12,qty:30},snacks:{n:'Packaged snacks',u:'packs',price:45,commission:.15,qty:45}};
+function createExternalRequest(){ensureBusinessData();const d=S.shopData;if(!n_('shop')||d.externalRequests.some(r=>r.open))return;const keys=Object.keys(EXTERNAL),k=keys[Math.floor(R_()*keys.length)],it=EXTERNAL[k],qty=it.qty*3;const r={id:S.nid++,item:k,qty,open:1,day:S.dayDone};d.externalRequests.unshift(r);note('warn','Supermarket manager — third-party stock','RB Fresh Mart requests '+fmt(qty)+' '+it.u+' of '+it.n+'. This is supplier-owned consignment stock: no inventory purchase from RB cash. Approve to let the store sell it and earn commission.',5);ui();save()}
+function decideExternalRequest(id,approve){ensureBusinessData();const d=S.shopData,r=d.externalRequests.find(x=>x.id===id&&x.open);if(!r)return;r.open=0;if(approve){d.externalStock[r.item]=(d.externalStock[r.item]||0)+r.qty;queueVisit({veh:'truck',col:0x2e7bd2,cargo:0xf1efe6,to:'shop',text:'Brand supplier to RB Fresh Mart ('+EXTERNAL[r.item].n+')',dwell:10});note('good','Third-party stock approved',fmt(r.qty)+' '+EXTERNAL[r.item].u+' of '+EXTERNAL[r.item].n+' added as supplier-owned stock. RB earns commission only when units sell.',5)}else note('info','Third-party stock declined','You declined the supplier consignment request for '+EXTERNAL[r.item].n+'.',5);ui();save()}
+function sellExternalDay(){const d=S.shopData,m=S.marketing;let commission=0;for(const k in EXTERNAL){const it=EXTERNAL[k],stock=d.externalStock[k]||0,boost=1+Math.min(.35,(m.reputation||0)/200)+(m.salesBoost||0);const qty=Math.min(stock,Math.max(0,Math.round(it.qty*n_('shop')*(.75+R_()*.5)*boost)));if(qty){d.externalStock[k]-=qty;d._units=(d._units||0)+qty;const gross=qty*it.price,fee=gross*it.commission;commission+=fee;d.sales.unshift({day:S.dayDone,week:S.week,item:'ext_'+k,qty,price:it.price,revenue:gross,profit:fee,commission:fee});m.customers=(m.customers||0)+qty;}}
+ if(commission>0){d.externalSales=(d.externalSales||0)+commission;d.commission=(d.commission||0)+commission;rev('Supermarket third-party sales commission',commission);settleCompletedSale('Third-party supermarket commission',commission);m.reputation=Math.min(100,(m.reputation||20)+.08);}
+ if(d.sales.length>100)d.sales.length=100;
+}
+function marketingFinanceWeekly(){ensureBusinessData();const m=S.marketing,d=S.shopData;const marketingFee=1200,financeFee=900;cost('Marketing team & campaigns',marketingFee);cost('Finance officer & reporting',financeFee);if(n_('shop'))cost('Supermarket utilities & maintenance',n_('shop')*500);const boost=Math.min(.4,.08+(m.reputation||20)/500);m.salesBoost=boost;m.campaigns=(m.campaigns||0)+1;m.reputation=Math.min(100,(m.reputation||20)+3);if(n_('shop'))note('good','Marketing & finance team report','Marketing campaign #'+m.campaigns+' improved simulated store demand by '+Math.round(boost*100)+'%. Brand reputation: '+Math.round(m.reputation)+'/100. Hospitality campaigns also promote farm stays, café meals and activities; higher reputation increases visitor demand and booking opportunities. Finance officer reconciled retail margin, commission income, cash flow and upcoming liabilities.',5)}
+function externalMgrHtml(){const d=S.shopData,m=S.marketing;let h='<h4>Third-party brands — commission inventory</h4><div class=sm>Supplier-owned goods; RB does not buy these goods. Approved sales earn a commission for the supermarket.</div><table><tr><th>Outside product</th><th>Stock</th><th>Retail price</th><th>RB commission</th></tr>';for(const k in EXTERNAL){const it=EXTERNAL[k];h+='<tr><td>'+it.n+'</td><td>'+fmt(d.externalStock[k]||0)+' '+it.u+'</td><td>'+BDT(it.price)+'</td><td>'+(it.commission*100)+'%</td></tr>'}h+='</table><h4>Third-party stock requests — your approval</h4>';const req=(d.externalRequests||[]).filter(r=>r.open);h+=req.length?req.map(r=>'<div class=card offer><b>Consignment stock: '+EXTERNAL[r.item].n+'</b><div class=sm>'+fmt(r.qty)+' '+EXTERNAL[r.item].u+' · supplier-owned · no RB purchase cost · commission '+(EXTERNAL[r.item].commission*100)+'%</div><button class=pri onclick=decideExternalRequest('+r.id+',true)>Approve stock</button> <button onclick=decideExternalRequest('+r.id+',false)>Decline</button></div>').join(''):'<div class=sm>No third-party stock requests waiting.</div>';h+='<div class=card><b>📣 Marketing team</b><div class=sm>Reputation: <b>'+Math.round(m.reputation||20)+'/100</b> · campaigns: '+(m.campaigns||0)+' · customer units sold: '+fmt(m.customers||0)+'. Weekly campaigns increase simulated demand.</div></div><div class=card><b>📊 Finance officer</b><div class=sm>Own-brand sales: '+BDT(d.totalSales||0)+' · own-brand margin: '+BDT(d.totalProfit||0)+' · third-party commission earned: '+BDT(d.commission||0)+'. Finance reviews cash flow, margins and upcoming liabilities. Weekly team costs: marketing '+BDT(6000)+' + finance '+BDT(4500)+'. Supermarket utilities/maintenance are tracked separately.</div></div>';return h}
+function createTourRequest(){ensureBusinessData();const t=S.tourism;if(!t.built||!t.license||t.booking||t.requests.some(r=>r.open))return;const guests=1+Math.floor(R_()*5),days=1+Math.floor(R_()*5);const r={id:t.nextId++,guests,days,amount:11000*days,open:1,day:S.dayDone,guest:['A family from Dhaka','A nature-loving couple','Three friends visiting Monohardi','A small family group'][Math.floor(R_()*4)]};t.requests.unshift(r);note('offer','Farm-stay booking request',r.guest+' request '+guests+' guest(s) for '+days+' day(s). The existing stay building holds up to 5 guests. Approve to confirm; rate is ৳11,000 per occupied building per day.',5);ui();save()}
+function decideTourRequest(id,approve){ensureBusinessData();const t=S.tourism,r=t.requests.find(x=>x.id===id&&x.open);if(!r)return;if(approve){if(!t.built||!t.license||t.booking){note('warn','Booking unavailable','The guest building is not open or is already occupied.',5);return}t.booking={guests:Math.min(5,r.guests),daysLeft:r.days,guest:r.guest,rate:11000};r.open=0;queueVisit({veh:'car',col:0x2f8f3a,to:'tour',text:r.guest+' — checking in',dwell:10});updTourLabel();note('good','Farm stay confirmed',r.guest+' accepted. '+t.booking.guests+' guest(s) will stay for '+r.days+' day(s). The farm earns ৳11,000 per day while occupied.',5)}else{r.open=0;note('info','Booking declined','You declined the guest stay request.',5)}ui();save()}
+function tourismDay(){ensureBusinessData();const t=S.tourism;if(!t.built||!t.license)return;if(!t.booking){if(S.dayDone%3===0)createTourRequest();return}const b=t.booking;rev('Agritourism guest stay',b.rate||11000);settleCompletedSale('Agritourism guest stay',b.rate||11000);t.income=(t.income||0)+(b.rate||11000);t.guests=(t.guests||0)+(b.guests||0);t.legalStayDays=(t.legalStayDays||0)+1;b.daysLeft--;if(b.daysLeft<=0){note('good','Guests checked out',b.guest+' checked out after their stay. Guest-stay revenue was credited to your cash account.',5);t.booking=null;queueVisit({veh:'car',col:0x2f8f3a,to:'tour',text:b.guest+' — checking out',dwell:8});if(S.dayDone%3===0)createTourRequest()} }
+function setShopPrice(k,v){ensureBusinessData();const it=SHOPITEMS[k],p=Number(v);if(!it||!Number.isFinite(p)||p<it.cost*1.08){note('warn','Price too low','Set '+it.n+' price to at least '+BDT(it.cost*1.08)+' to cover the manager\'s simulated unit cost.',5);ui();return}S.shopData.prices[k]=p;note('good','Shelf price updated',it.n+' shelf price set to '+BDT(p)+' per '+it.u+'. Prices will still fluctuate weekly with the market.',5);save();ui()}
+
+/* ---- additive hospitality complex: independently funded, no map/layout changes ---- */
+const HOSP={lodge:{name:'Standard room lodge (5 rooms)',cost:1800000,rooms:5,rate:4620,run:52,desc:'Five clean standard rooms with daily housekeeping.'},premium:{name:'Premium farm cottages (5 units)',cost:2500000,rooms:5,rate:8580,run:62,desc:'Five private cottages with better amenities and premium pricing.'},suite:{name:'Family suite (5 units)',cost:1250000,rooms:5,rate:11550,run:35,desc:'Five larger family suites for longer stays.'},reception:{name:'Reception & guest-service desk',cost:450000,rooms:0,rate:0,run:22,desc:'Check-in/out, reservations, guest help and complaint handling.'},restaurant:{name:'Farm-to-table restaurant & café',cost:1200000,rooms:0,rate:0,run:48,desc:'Meals and refreshments prioritise available RB farm produce; ingredient and staff costs are deducted.'},activities:{name:'Recreation & farm-experience centre',cost:650000,rooms:0,rate:0,run:18,desc:'Guided farm tours, fishing sessions, picnic area and walking/cycling activities.'},shuttle:{name:'Guest shuttle & parking',cost:900000,rooms:0,rate:0,run:26,desc:'Guest pickup, short farm shuttle trips and organised parking.'},housekeeping:{name:'Housekeeping & laundry equipment',cost:250000,rooms:0,rate:0,run:13,desc:'Laundry, linen, cleaning supplies and room-turnover support.'}};
+function buildHospitality(k){ensureBusinessData();const h=S.hospitality,e=HOSP[k];if(!e||h.built[k])return;h.built[k]=1;note('good','Hospitality facility activated free',e.name+' is now available at ৳0 construction cost. No cash or capital expense was deducted.',5);save();ui();hud()}
+function hospitalityRooms(){const h=(S.hospitality&&S.hospitality.built)||{};return ['lodge','premium','suite'].reduce((n,k)=>n+(h[k]?HOSP[k].rooms:0),0)}
+function createHospitalityRequest(){ensureBusinessData();const h=S.hospitality;if(!S.tourism.license||!hospitalityRooms()||h.requests.some(r=>r.open))return;const types=['suite','premium','lodge'].filter(k=>h.built[k]);if(!types.length)return;const type=types[Math.floor(R_()*types.length)],e=HOSP[type],occupied=h.stays.filter(b=>b.type===type).reduce((n,b)=>n+b.rooms,0),available=Math.max(0,e.rooms-occupied);if(!available)return;const m=S.marketing||{},demandBoost=Math.min(.8,Math.max(0,(Number(m.reputation)||20)/100+(Number(m.salesBoost)||0))),rooms=Math.min(available,1+Math.floor(Math.pow(R_(),1/(1+demandBoost))*available)),baseDays=1+Math.floor(R_()*3),days=Math.min(5,baseDays+(R_()<demandBoost*.6?1:0)),guest=['A family from Dhaka','A nature-loving couple','A small group visiting Monohardi','A returning farm-tour guest'][Math.floor(R_()*4)];h.requests.unshift({id:h.nextId++,type,rooms,days,guest,amount:rooms*e.rate*days,open:1,day:S.dayDone});note('offer','Hospitality reservation request',guest+' request '+rooms+' '+e.name.toLowerCase()+' for '+days+' day(s). Potential room revenue '+BDT(rooms*e.rate*days)+'. Review it in Operations and approve or decline.',5);ui();save()}
+function decideHospitalityRequest(id,approve){ensureBusinessData();const h=S.hospitality,r=h.requests.find(x=>x.id===id&&x.open);if(!r)return;r.open=0;if(!approve){note('info','Reservation declined','You declined '+r.guest+'’s hospitality reservation.',5);ui();save();return}if(!S.tourism.license||!h.built[r.type]){note('warn','Reservation blocked','The licence or requested accommodation is not available.',5);ui();return}const occupied=h.stays.filter(b=>b.type===r.type).reduce((n,b)=>n+b.rooms,0);if(occupied+r.rooms>HOSP[r.type].rooms){note('warn','No room availability','Those rooms are no longer available. Decline the request or wait until check-out.',5);ui();return}h.stays.push({id:r.id,type:r.type,rooms:r.rooms,daysLeft:r.days,guest:r.guest,rate:HOSP[r.type].rate});h.bookings++;note('good','Reservation confirmed',r.guest+' booked '+r.rooms+' unit(s) for '+r.days+' day(s). Revenue is credited daily while the stay is active.',5);queueVisit({veh:'car',col:0x2f8f3a,to:'tour',text:r.guest+' — hospitality check-in',dwell:10});ui();save()}
+function cancelHospitalityStay(id){ensureBusinessData();const h=S.hospitality,b=h.stays.find(x=>x.id===id);if(!b)return;h.stays=h.stays.filter(x=>x.id!==id);note('warn','Reservation cancelled','Remaining nights for '+b.guest+' were cancelled. No future room revenue will be credited.',5);ui();save()}
+function hospitalityDay(){ensureBusinessData();const h=S.hospitality,b=h.built;if(!Object.keys(b).some(k=>b[k]))return;
+ for(const k in HOSP)if(b[k]&&HOSP[k].run)cost('Hospitality operating cost — '+HOSP[k].name,HOSP[k].run/7);
+ if(!S.tourism.license)return;
+ if(S.dayDone%2===0)createHospitalityRequest();let occ=0;
+ for(let i=h.stays.length-1;i>=0;i--){const stay=h.stays[i];const revv=stay.rooms*stay.rate;rev('Hospitality accommodation revenue',revv);settleCompletedSale('Hospitality accommodation revenue',revv);h.income+=revv;h.occupiedRoomDays+=stay.rooms;h.guests+=stay.rooms*(stay.type==='suite'?3:stay.type==='premium'?2:1.6);occ+=stay.rooms;stay.daysLeft--;if(stay.daysLeft<=0){note('good','Hospitality check-out',stay.guest+' checked out. Stay revenue has been recorded in Finance.',5);queueVisit({veh:'car',col:0x2f8f3a,to:'tour',text:stay.guest+' — check-out',dwell:8});h.stays.splice(i,1)}}
+ if(b.restaurant){const demandBoost=1+Math.min(.5,(S.marketing&&S.marketing.reputation||20)/200)+(S.marketing&&S.marketing.salesBoost||0),diners=Math.max(0,Math.round((occ*2+(R_()<.62?3:0))*(.6+R_()*.7)*demandBoost)),sales=diners*682,ingredients=diners*285;if(sales){rev('Farm-to-table restaurant sales',sales);settleCompletedSale('Farm-to-table restaurant sales',sales);cost('Restaurant ingredients & meal service',ingredients);h.income+=sales}}
+ if(b.activities){const demandBoost=1+Math.min(.5,(S.marketing&&S.marketing.reputation||20)/200)+(S.marketing&&S.marketing.salesBoost||0),visitors=Math.max(0,Math.round((occ*1.2+(R_()<.5?3:0))*(.5+R_()*.8)*demandBoost)),sales=visitors*495;if(sales){rev('Farm experiences & recreation',sales);settleCompletedSale('Farm experiences & recreation',sales);h.income+=sales}}
+ if(b.shuttle&&occ&&R_()<.65){const sales=occ*385;rev('Guest shuttle service',sales);settleCompletedSale('Guest shuttle service',sales);h.income+=sales}
+ if(b.reception&&occ&&R_()<.03){h.complaints++;if(b.housekeeping)note('info','Guest service report','Reception logged a small guest request and housekeeping resolved it. Service standards maintained.',5);else note('warn','Guest service issue','A guest raised a cleanliness/service issue. Build housekeeping & laundry equipment to reduce repeat complaints.',5)}
+}
+function hospitalityHtml(){ensureBusinessData();const h=S.hospitality,b=h.built,rooms=hospitalityRooms();let x='<h4>🏡 RB Hospitality & Farm Experience Complex</h4><div class=sm>All hospitality facilities are unlocked, built and licensed from the beginning at ৳0 construction cost. No cash or capital expense is deducted. Ongoing staffing, ingredients and operating expenses still apply. The existing farm map and other business systems are unchanged.</div><div class=card><div class=r><b>Accommodation capacity</b><b>'+rooms+' room/unit(s)</b></div><div class=sm>Lifetime hospitality income: '+BDT(h.income||0)+' · occupied room-days: '+fmt(h.occupiedRoomDays||0)+' · guest units served: '+fmt(h.guests||0)+' · guest-service issues: '+fmt(h.complaints||0)+'</div><div class=sm>Existing RB Farm Stay cottage remains unchanged and is managed separately below.</div></div>';
+ let rq=(h.requests||[]).filter(r=>r.open);x+='<h4>📅 Reservations & room availability</h4>'+(rq.length?rq.map(r=>'<div class=card offer><b>'+r.guest+'</b><div class=sm>'+r.rooms+' × '+HOSP[r.type].name+' · '+r.days+' day(s) · potential revenue '+BDT(r.amount)+'.</div><button class=pri onclick=decideHospitalityRequest('+r.id+',true)>Confirm reservation</button> <button onclick=decideHospitalityRequest('+r.id+',false)>Decline</button></div>').join(''):'<div class=sm>No new hospitality reservation requests. Marketing-led reservation requests may arrive every two game days when rooms are available.</div>');x+='<h4>Current stays</h4>'+(h.stays.length?h.stays.map(r=>'<div class=card><b>'+r.guest+'</b><div class=sm>'+r.rooms+' × '+HOSP[r.type].name+' · '+r.daysLeft+' day(s) remaining · '+BDT(r.rate)+' per room/day.</div><button onclick=cancelHospitalityStay('+r.id+')>Cancel remaining stay</button></div>').join(''):'<div class=sm>No guests currently checked into the added accommodation.</div>');
+ const order=['lodge','premium','suite','reception','restaurant','activities','shuttle','housekeeping'];for(const k of order){const e=HOSP[k],done=!!b[k];x+='<div class=card><div class=r><b>'+({lodge:'🛏️ ',premium:'🌿 ',suite:'👨‍👩‍👧 ',reception:'🛎️ ',restaurant:'🍲 ',activities:'🚲 ',shuttle:'🚐 ',housekeeping:'🧺 '}[k])+e.name+'</b><span>'+(done?'BUILT':'AVAILABLE')+'</span></div><div class=sm>'+e.desc+(e.rooms?' Room rate: '+BDT(e.rate)+'/occupied room/day.':'')+' Weekly running cost (99% reduced): '+BDT(e.run) +'.</div><button '+(done?'disabled':'')+' onclick="buildHospitality(\''+k+'\')">'+(done?'Built · FREE':'Activate free')+'</button>'+(done?' <span class=sm>Upfront cost: ৳0</span>':'')+'</div>'}
+ x+='<div class=sm>Upfront facility cost: ৳0 for every hospitality facility. Cash available now '+BDT(S.cash)+'. Ongoing operating expenses are still recorded through the existing finance ledger. Restaurant ingredient costs are recorded separately; menu sales favour farm produce when available.</div>';return x}
+
+/* ---- integrated inventory controls ---- */
+function stockVillageProduct(kind){ensureBusinessData();const v=S.village,d=S.shopData;if(!n_('shop')){note('warn','No supermarket available','Build at least one RB Fresh Mart in Expansion before transferring bottled products to supermarket shelves.',7);return}
+ const key=kind==='milk'?'bottledMilk':'bottledWater',field=kind==='milk'?'milkBottles':'waterBottles',qty=Math.max(0,Math.min(Math.floor(Number($('stockQty_'+kind)?.value)||0),v[field]||0));if(!qty){note('warn','No bottles transferred','Enter a quantity greater than zero and make sure the bottling inventory has stock.',6);return}
+ v[field]-=qty;d.stock[key]=(d.stock[key]||0)+qty;note('good','Bottled products stocked',qty+' '+(kind==='milk'?'RB Fresh Milk':'RB Pure Water')+' bottle(s) transferred to RB Fresh Mart shelves. Supermarket sales will now deduct shelf stock and record revenue/margin.',7);ui();save();hud()}
+function setVillagePrice(kind,value){ensureBusinessData();const v=S.village;const n=Math.max(kind==='milk'?102:17,Math.min(kind==='milk'?500:150,Number(value)||0));if(kind==='milk')v.milkPrice=n;else v.waterPrice=n;S.shopData.prices[kind==='milk'?'bottledMilk':'bottledWater']=n;note('info','Brand price updated',(kind==='milk'?'RB Fresh Milk':'RB Pure Water')+' retail price set to '+BDT(n)+' per 1 L bottle. The supermarket shelf price has been updated too.',5);ui();save()}
+function currentOperatingProfit(){const rp=S.rep||{r:{},c:{}};let r=0,c=0;for(const k in (rp.r||{}))r+=Number(rp.r[k])||0;for(const k in (rp.c||{}))if(!isPrincipalRepaymentLabel(k))c+=Number(rp.c[k])||0;return r-c}
+function inventorySummaryHtml(){ensureBusinessData();const v=S.village||{},d=S.shopData||{},s=d.stock||{};const p=currentOperatingProfit();const rp=S.rep||{r:{},c:{}};let rr=0,cc=0;for(const k in (rp.r||{}))rr+=Number(rp.r[k])||0;for(const k in (rp.c||{}))if(!isPrincipalRepaymentLabel(k))cc+=Number(rp.c[k])||0;const margin=rr>0?(p/rr*100):0;return '<div class="card" style="border-color:'+(p>=0?'#48b982':'#ff7777')+'"><div class=r><b>📈 Profit meter · current week</b><b class='+(p>=0?'pos':'neg')+'>'+BDT(p)+'</b></div><div class=sm>Recorded income '+BDT(rr)+' · operating costs '+BDT(cc)+' · operating margin '+margin.toFixed(1)+'%. Loan principal repayments are cash flow, not operating expense. Current-week figure resets at weekly settlement.</div><div style="height:9px;background:#263443;border-radius:8px;overflow:hidden"><div style="height:9px;width:'+Math.max(0,Math.min(100,50+margin))+'%;background:'+(p>=0?'#48b982':'#ff7777')+'"></div></div></div><div class="card" style="border-color:#4f9bd6"><div class="r"><b>📦 RB Group Control Panel · Inventory</b><button onclick="tab=7;ui()">Manage</button></div><div class="sm">Live stock overview · quantities update as production, transfers and supermarket sales occur.</div><table><tr><th>Product / location</th><th>Available</th></tr><tr><td>Raw farm milk</td><td>'+fmt(S.inv.milk||0)+' L</td></tr><tr><td>RB Fresh Milk — bottling inventory</td><td>'+fmt(v.milkBottles||0)+' bottles</td></tr><tr><td>RB Fresh Milk — supermarket shelves</td><td>'+fmt(s.bottledMilk||0)+' bottles</td></tr><tr><td>RB Pure Water — bottling inventory</td><td>'+fmt(v.waterBottles||0)+' bottles</td></tr><tr><td>RB Pure Water — supermarket shelves</td><td>'+fmt(s.bottledWater||0)+' bottles</td></tr><tr><td>Farm eggs / milk / fish / vegetables in RB Fresh Mart</td><td>'+fmt(s.egg||0)+' / '+fmt(s.milk||0)+' / '+fmt(s.fish||0)+' / '+fmt(s.veg||0)+'</td></tr><tr><td>Village shops rented / weekly rent</td><td>'+fmt(v.occupiedShops||0)+' / '+fmt(v.totalShops||4)+' · '+BDT((v.occupiedShops||0)*(v.rentPerShop||3500))+'</td></tr><tr><td>Village café sales / visitors today</td><td>'+BDT(v.cafeSales||0)+' lifetime · '+fmt(v.visitorsToday||0)+' today</td></tr><tr><td>Lifetime shop rent collected</td><td>'+BDT(v.rentIncome||0)+'</td></tr></table><div class="sm">Bottling inventory and supermarket shelf stock are separate. Use the Village tab to produce bottles and transfer them to a store. Sold products leave shelf stock automatically.</div></div><div class=card><div class=r><b>🛒 RB Fresh Mart — supermarket stock only</b><button onclick="tab=5;ui()">Manage prices & stock</button></div><table><tr><th>Shelf product</th><th>Current stock</th><th>Price</th></tr>'+Object.keys(SHOPITEMS).map(k=>'<tr><td>'+SHOPITEMS[k].n+'</td><td>'+fmt(s[k]||0)+' '+SHOPITEMS[k].u+'</td><td>'+BDT(d.prices[k]||SHOPITEMS[k].base)+'/'+SHOPITEMS[k].u+'</td></tr>').join('')+'</table><div class=sm>Only stock physically available on supermarket shelves is shown here. Sales reduce these quantities; approve stock-purchase requests in the Manager tab.</div></div>'}
+/* ---- village lounge, rental shops and RB bottled products ---- */
+function produceVillageProduct(kind){ensureBusinessData();const v=S.village;if(kind==='milk'){
+ const litres=Math.min(20,Math.floor(S.inv.milk||0));if(litres<20)return note('warn','Milk bottling paused','The RB Dairy line needs 20 litres of fresh farm milk for one 20-bottle batch. Current milk stock: '+fmt(S.inv.milk||0)+' L.',7);
+ const pack=litres*12,process=litres*8;S.inv.milk-=litres;v.milkBottles+=litres;v.milkProduced+=litres;cost('RB bottled milk — packaging',pack);cost('RB bottled milk — processing & chilling',process);note('good','Milk bottling batch completed',litres+' one-litre RB Fresh Milk bottles produced. Farm milk used: '+litres+' L; packaging and processing cost '+BDT(pack+process)+'. Refrigerate and sell before expiry.',7)
+ }else if(kind==='water'){
+ const bottles=50,source=bottles*3,pack=bottles*8,process=bottles*4;cost('RB bottled water — tested source water',source);cost('RB bottled water — bottles & caps',pack);cost('RB bottled water — filtration, UV & quality checks',process);v.waterBottles+=bottles;v.waterProduced+=bottles;note('good','Water bottling batch completed',bottles+' one-litre RB Pure Water bottles produced. Source-water, packaging and treatment cost '+BDT(source+pack+process)+'. This is a game simulation; real production requires approved water testing and applicable licences.',7)
+ }
+ ui();hud();save();
+}
+function setVillageTenants(delta){ensureBusinessData();const v=S.village;v.occupiedShops=Math.max(0,Math.min(v.totalShops,v.occupiedShops+delta));note('info','Village tenancy updated',v.occupiedShops+' of '+v.totalShops+' village shops currently rented. Expected weekly rent: '+BDT(v.occupiedShops*v.rentPerShop)+'. Rent is credited at weekly settlement.',7);bVillage();ui();save()}
+function setVillageRent(value){ensureBusinessData();const v=S.village,p=Math.round(Number(value));if(!Number.isFinite(p)||p<500||p>50000){note('warn','Invalid rent','Set rent between ৳500 and ৳50,000 per shop per week.',7);ui();return}v.rentPerShop=p;note('good','Shop rent updated','Rent set to '+BDT(p)+' per occupied shop per week. Expected rent at current occupancy: '+BDT(p*v.occupiedShops)+'.',7);ui();save()}
+function villageDay(){ensureBusinessData();const v=S.village;
+ // Daily rent accrues transparently and is paid into cash at the weekly settlement.
+ v.rentAccrued=(Number(v.rentAccrued)||0)+(v.occupiedShops*v.rentPerShop/7);
+ // Realistic simulated footfall: reputation and licensed farm tourism attract more visitors.
+ const rep=Math.max(0,Math.min(100,Number(S.marketing.reputation)||20));
+ const touristBonus=(S.tourism&&S.tourism.built&&S.tourism.license)?Math.round(3+rep*.08):0;
+ const footfall=Math.max(3,Math.round(5+rep*.12+R_()*7)+touristBonus);
+ v.visitorsToday=footfall;v.visitorsTotal=(Number(v.visitorsTotal)||0)+footfall;v.footfallEstimate=footfall;
+ const cafe=Math.round(footfall*(125+R_()*85));const ingredients=Math.round(cafe*.48);
+ if(cafe>0){rev('Village Lounge café sales',cafe);settleCompletedSale('Village Lounge café sales',cafe);cost('Village Lounge café ingredients',ingredients);v.cafeSales+=cafe;v.cafeCosts+=ingredients;}
+ // Bottled products stay in plant inventory until owner-authorized transfer to supermarket shelves.
+}
+function villageSettle(){ensureBusinessData();const v=S.village;const rent=Math.round(Number(v.rentAccrued)||0);v.rentAccrued=0;v.lastRentPaid=rent;if(rent>0){v.rentIncome+=rent;v.rentPayments=(v.rentPayments||0)+1;rev('Village shop rental income',rent);settleCompletedSale('Village shop rental income',rent);note('good','Village shop rent collected',BDT(rent)+' rent collected from '+v.occupiedShops+' occupied shop(s) and credited to cash. Lifetime rent collected: '+BDT(v.rentIncome)+'.',7)}cost('Village square cleaning & security',1000);cost('RB dairy and water bottling plant overhead',4500);note('info','Village Lounge weekly report','Rent collected this settlement: '+BDT(rent)+'; lifetime rent: '+BDT(v.rentIncome)+'. Café sales: '+BDT(v.cafeSales)+'; café ingredient costs: '+BDT(v.cafeCosts)+'; estimated café contribution before overhead: '+BDT(v.cafeSales-v.cafeCosts)+'. Visitors today: '+fmt(v.visitorsToday)+'. Bottled milk stock '+fmt(v.milkBottles)+'; bottled water stock '+fmt(v.waterBottles)+'.',7)}
+function villageHtml(){ensureBusinessData();const v=S.village;const cafeNet=v.cafeSales-v.cafeCosts;return `<h4>🏡 RB Village Lounge & Commercial Square</h4><div class=sm>A working roadside village plaza beside the farm access road. Rent is credited to cash at weekly settlement; footfall and café sales change with marketing reputation and licensed tourism. Your six-acre production-zone allocation remains unchanged.</div><div class=card style=border-color:#4f9bd6><div class=r><b>🏪 Shop rental dashboard</b><b>${v.occupiedShops}/${v.totalShops} rented</b></div><div class=stats><div><span>Expected weekly rent</span><b>${BDT(v.occupiedShops*v.rentPerShop)}</b></div><div><span>Rent accrued this week</span><b>${BDT(v.rentAccrued||0)}</b></div><div><span>Last rent payment</span><b>${BDT(v.lastRentPaid||0)}</b></div><div><span>Lifetime rent collected</span><b>${BDT(v.rentIncome||0)}</b></div></div><div class=sm>Current occupancy: ${v.occupiedShops} paying tenant(s), ${v.totalShops-v.occupiedShops} vacant unit(s). Rent is shown separately from café and product sales.</div><label>Rent per occupied shop / week (৳) <input id=villageRentInput type=number min=500 max=50000 step=500 value="${v.rentPerShop}" style=width:120px> <button onclick="setVillageRent(document.getElementById('villageRentInput').value)">Set rent</button></label><div><button onclick="setVillageTenants(-1)" ${v.occupiedShops<=0?'disabled':''}>− Tenant</button> <button class=pri onclick="setVillageTenants(1)" ${v.occupiedShops>=v.totalShops?'disabled':''}>+ Rent out vacant shop</button></div><div class=sm>Tenants are simulated businesses; each occupied unit pays your set weekly rent. Vacant shops earn nothing.</div></div><div class=card><div class=r><b>🚶 Village footfall & visitor activity</b><b class=pos>${fmt(v.visitorsToday||0)} today</b></div><div class=stats><div><span>Estimated visitors today</span><b>${fmt(v.visitorsToday||0)}</b></div><div><span>Visitors to date</span><b>${fmt(v.visitorsTotal||0)}</b></div><div><span>Marketing reputation</span><b>${Math.round(S.marketing.reputation||20)}/100</b></div><div><span>Farm tourism</span><b>${S.tourism&&S.tourism.built&&S.tourism.license?'Licensed':'General visitors'}</b></div></div><div class=sm>Visitors are simulated from village footfall, marketing and tourism. Pedestrians and visitor vehicles now use the lounge area rather than only passing the main farm road.</div></div><div class=card><div class=r><b>☕ Village Lounge Café</b><b class=${cafeNet>=0?'pos':'neg'}>Net ${BDT(cafeNet)}</b></div><div class=stats><div><span>Lifetime café sales</span><b>${BDT(v.cafeSales)}</b></div><div><span>Ingredient costs</span><b>${BDT(v.cafeCosts)}</b></div><div><span>Contribution before shared overhead</span><b>${BDT(cafeNet)}</b></div></div><div class=sm>Daily sales are driven by estimated visitor footfall. Ingredient costs are deducted, so Finance shows both revenue and expenses.</div></div><h4>🥛 RB Dairy & 💧 RB Pure Water Bottling Plant</h4><div class=sm>Use the <b>Bottling plant</b> camera button to view the tanks, filling line and bottles. Produce, price and transfer finished bottles yourself.</div><div class=card><div class=r><b>🥛 RB Fresh Milk · 1 litre</b><b>${fmt(v.milkBottles)} bottles in plant inventory</b></div><div class=sm>Batch: 20 bottles · packaging + processing: ৳20/bottle · uses 20 L of farm milk. Lifetime production: ${fmt(v.milkProduced)} · supermarket sales value: ${BDT(v.milkSales)}.</div><label>Retail price (৳ per bottle) <input id=milkPriceInput type=number min=40 max=500 value="${v.milkPrice}" style=width:100px> <button onclick="setVillagePrice('milk',document.getElementById('milkPriceInput').value)">Apply price</button></label><button class=pri onclick="produceVillageProduct('milk')" ${(S.inv.milk||0)<20?'disabled':''}>Bottle 20 L of farm milk</button><div class=sm>Raw farm milk: ${fmt(S.inv.milk||0)} L · ready for transfer: ${fmt(v.milkBottles)} bottles.</div><label>Transfer quantity <input id=stockQty_milk type=number min=1 max="${v.milkBottles}" value="${Math.min(20,v.milkBottles)}" style=width:85px> <button onclick="stockVillageProduct('milk')" ${v.milkBottles<1||!n_('shop')?'disabled':''}>Stock RB Fresh Mart</button></label></div><div class=card><div class=r><b>💧 RB Pure Water · 1 litre</b><b>${fmt(v.waterBottles)} bottles in plant inventory</b></div><div class=sm>Batch: 50 bottles · simulated source water, bottles/caps and treatment: ৳15/bottle. Lifetime production: ${fmt(v.waterProduced)} · supermarket sales value: ${BDT(v.waterSales)}. Real production requires source testing and applicable licences.</div><label>Retail price (৳ per bottle) <input id=waterPriceInput type=number min=10 max=150 value="${v.waterPrice}" style=width:100px> <button onclick="setVillagePrice('water',document.getElementById('waterPriceInput').value)">Apply price</button></label><button class=pri onclick="produceVillageProduct('water')">Produce 50 water bottles</button><div class=sm>Ready for transfer: ${fmt(v.waterBottles)} bottles.</div><label>Transfer quantity <input id=stockQty_water type=number min=1 max="${v.waterBottles}" value="${Math.min(50,v.waterBottles)}" style=width:85px> <button onclick="stockVillageProduct('water')" ${v.waterBottles<1||!n_('shop')?'disabled':''}>Stock RB Fresh Mart</button></label></div><div class=card><b>📦 Linked inventory & sales</b><div class=sm>Produce bottles → transfer to RB Fresh Mart → supermarket sells only available shelf stock → sold units are deducted automatically. Main Control Panel inventory and Manager reports show the stock and sales trail.</div></div><div class=card><b>Commercial square weekly costs</b><div class=sm>Cleaning/security: ৳1,000 · bottling plant overhead: ৳4,500. Check Finance for these expenses and the separate rent/café income lines.</div></div>`}
+
+/* ---- daily simulation ---- */
+function day(){const I=S.inv,f=S.fl;ensureBusinessData();supermarketDay();sellExternalDay();shopTraffic();tourismDay();hospitalityDay();villageDay();energyDay();
+ // Farm by-products feed the mill first; no automatic ingredient purchases.
+ const use=weekUse()/7,externalAllowance=use*.02;
+ if(n_('mill')&&S.feedRawKg>0){const made=Math.min(S.feedRawKg,n_('mill')*2000/7);S.feedRawKg-=made;I.feed+=made;S.feedProducedInternal=(S.feedProducedInternal||0)+made;}
+ const availableFeed=Math.min(I.feed,use);I.feed-=availableFeed;
+ const genuineShortage=Math.max(0,use-availableFeed),externalFeed=Math.min(genuineShortage,externalAllowance);
+ if(externalFeed>0){cost('Permitted external feed purchase (max 2% of daily demand)',externalFeed*S.pr.feed*1.12);S.feedExternalBought=(S.feedExternalBought||0)+externalFeed;}
+ const unmet=Math.max(0,genuineShortage-externalFeed);
+ if(unmet>0&&cdn('feed-shortage',2))note('warn','Feed shortage — ration not fully supplied','Internal feed stock and the permitted 2% external allowance cover '+fmt(use-unmet)+' of '+fmt(use)+' kg required today. Shortage: '+fmt(unmet)+' kg. Grow/allocate more feed crops or add feed-mill capacity; no extra feed is invented.',0);
+ if(S.feedRawKg<1&&n_('mill')&&cdn('raw-shortage',3))note('warn','Farm feed ingredients low','Farm-produced feed raw materials are '+fmt(S.feedRawKg)+' kg. Harvests contribute feed by-products; no outside raw-material charge is applied automatically.',0);
+ const oldMilk=I.milk,oldEgg=I.egg;
+ I.milk+=n_('dairy')*10*(f.heat?.85:1);I.egg+=n_('poul')*400*(f.dis?.65:1);
+ if(oldMilk<1&&I.milk>=1)note('good','Milk available','Fresh milk is ready: '+fmt(I.milk)+' L in stock. Review the Market tab and approve a sale when you are ready.',1);
+ if(oldEgg<1&&I.egg>=1)note('good','Eggs available','Eggs are ready: '+fmt(I.egg)+' pcs in stock. Review the Market tab and approve a sale when you are ready.',1);
+ // Daily farm-generated manure: about 18 kg per dairy cow and 0.08 kg per layer bird (500 birds per shed). This is internal feedstock, never an automatic purchase.
+ S.organicWasteKg+=(n_('dairy')*18+n_('poul')*500*.08);
+ if(n_('bio')){const inputKg=Math.min(S.organicWasteKg,n_('bio')*120);S.organicWasteKg-=inputKg;const g=Math.min(n_('bio')*60,inputKg*.35),own=Math.min(g,6);S.bioGasUsed=(S.bioGasUsed||0)+own;S.biogasSavingsWeek=(S.biogasSavingsWeek||0)+own*16;let sur=g-own;
+  if(inputKg<n_('bio')*120&&cdn('bio-input-short',3))note('warn','Biogas input shortage','Available farm-produced manure/organic waste limited digester input to '+fmt(inputKg)+' kg today. Output reduced accordingly; no purchased or free waste was added.',0);
+  for(const c of S.contracts.filter(c=>c.ty=='gas')){const d=Math.min(sur,c.vol);rev('Biogas contract sales',d*c.price);settleCompletedSale('Biogas contract sales',d*c.price);sur-=d;
+   if(d<c.vol){cost('Biogas shortfall penalty',(c.vol-d)*c.price*.25);if(cdn('gas'+c.client,10))note('warn','Biogas shortfall','Output is below the '+c.vol+' m³/day promised to '+c.client+'. Penalties apply — add livestock or digesters.',0)}}
+  rev('Biogas sales (spot)',sur*S.pr.gas);settleCompletedSale('Biogas sales (spot)',sur*S.pr.gas)}
+ for(const k of['fish','crop'])S.u[k].forEach(u=>{if(u.p>=0){u.p+=1/7;if(u.p>=E[k].cyc){const q=E[k].out[1]*u.y*(.92+R_()*.16);if(k==='crop'){const feedByproduct=q*.45;S.feedRawKg=(S.feedRawKg||0)+feedByproduct;I.veg+=q-feedByproduct;S.organicWasteKg=(S.organicWasteKg||0)+q*.08;}else I.fish+=q;
+  note('good','Harvest complete',fmt(k==='crop'?q*.55:q)+' kg of '+(k=='fish'?'fish':'vegetables')+' added to stock.'+(k==='crop'?'; '+fmt(q*.45)+' kg of crop by-product routed to the feed mill.':''),1);u.p=-1;u.y=1}}});
+ if(S.auto)restock();
+ const sur=I.feed-weekUse()*3;if(n_('mill')&&sur>0){const q=Math.min(sur,n_('mill')*1500/7);rev('Feed sales (external)',q*S.pr.feed*.96);settleCompletedSale('Feed sales (external)',q*S.pr.feed*.96);I.feed-=q}
+ // Products remain in inventory until the player approves a market sale. No automatic spot sales.
+ const kg=totalKg(),cov=kg?Math.min(1,(3000+Math.max(0,n_('store')*20000-storeKg()))/kg):1;for(const k in P)I[k]*=1-P[k].sp*(1-.8*cov)}
+
+function approveSale(k,priceValue,qtyValue){
+ const p=P[k],available=Math.max(0,S.inv[k]-resv(k));
+ const price=Number(priceValue),qty=Number(qtyValue);
+ if(!Number.isFinite(price)||price<=0)return note('warn','Invalid price','Enter a selling price above zero.',1);
+ if(!Number.isFinite(qty)||qty<=0)return note('warn','Invalid quantity','Enter a quantity above zero.',1);
+ if(available<1)return note('warn','Out of stock','There is no available '+p.n.toLowerCase()+' to sell.',1);
+ if(qty>available+1e-6)return note('warn','Not enough stock','You offered '+fmt(qty)+' but only '+fmt(available)+' '+p.u+' is available.',1);
+ const revenue=qty*price;S.inv[k]=Math.max(0,S.inv[k]-qty);rev('Approved market sale — '+p.n,revenue);const settlement=settleCompletedSale(p.n,revenue);visitFor(k,'Market buyer','buying '+fmt(qty)+' '+p.u+' of '+p.n.toLowerCase());
+ if(!Array.isArray(S.salesLog))S.salesLog=[];
+ S.salesLog.unshift({day:S.dayDone,week:S.week,item:k,qty,price,revenue});if(S.salesLog.length>100)S.salesLog.length=100;
+ note('good','Sale approved and recorded',fmt(qty)+' '+p.u+' of '+p.n.toLowerCase()+' sold at '+BDT(price)+'/'+p.u+'. Revenue: '+BDT(revenue)+'. Automatic loan principal: '+BDT(settlement.repayment)+'; simulated VAT accrued at 0.2%: '+BDT(settlement.vat)+'. Loan principal is a financing cash flow, not an operating expense.',1);
+ if(S.inv[k]<1)note('warn','Out of stock',p.n+' stock is now zero. The next batch will appear when production makes it available.',1);
+ ui();hud();save();
+}
+
+function restock(){for(const k of['fish','crop'])S.u[k].forEach(u=>{if(u.p<0){const c=E[k].seed*(k=='crop'&&n_('bio')?.8:1);
+ if(S.cash>=c){cost(k=='fish'?'Fish seed & medicine':'Seed & fertiliser',c);u.p=0;u.y=1;if(cdn('vSeed'+k,5))queueVisit({veh:'van',col:0x2f8f3a,to:k=='fish'?'fishery':'agri',text:k=='fish'?'Fingerling & medicine supplier':'Seed & fertiliser supplier',dwell:8})}}})}
+
+function event(){S.fl={};if(R_()>.10)return;let e=Math.floor(R_()*7);if(e===1&&n_('poul')&&R_()<.55){S.legal.healthIncidentsPrevented=(S.legal.healthIncidentsPrevented||0)+1;note('good','Farm doctor prevented a loss','The doctor’s routine flock-health checks caught an early warning. A disease-related production loss was avoided.',5);return}if(e===2&&n_('dairy')&&R_()<.5){S.legal.healthIncidentsPrevented=(S.legal.healthIncidentsPrevented||0)+1;note('good','Farm doctor reduced heat risk','The doctor’s animal-welfare checklist triggered early hydration and shade checks, reducing the risk of a milk-output loss.',5);return}
+ if(e==0&&stocked()){S.u.fish.forEach(u=>{if(u.p>=0)u.y*=.94});lg('Minor flood warning: fish yield −6% this cycle. Inspect pond banks, maintain drainage and keep emergency repairs ready.','bad','Flood')}
+ else if(e==1&&n_('poul')){S.fl.dis=1;lg('Disease warning in the layer sheds: egg output −20% this week. Check clean water, ventilation and flock behaviour; isolate visibly sick birds and contact a vet if symptoms appear.','bad','Poultry disease')}
+ else if(e==2&&n_('dairy')){S.fl.heat=1;lg('Heat wave: milk output −15% this week.','warn','Heat stress')}
+ else if(e==3){S.pr.fish*=1.18;lg('Festival demand has lifted the fish price.','good','Market')}
+ else if(e==4&&S.u.crop.some(u=>u.p>=0)){S.u.crop.forEach(u=>{if(u.p>=0)u.y*=.9});lg('Pest warning: vegetable yield −10% this cycle. Inspect leaves, remove affected plants and use approved control only if needed.','bad','Pests')}
+ else if(e==5){for(const k in P)S.inv[k]*=.96;lg('Power outage: 4% of stored goods spoiled. Check backup power and cold-room temperature.','bad','Outage')}
+ else if(e==6){S.pr.feed*=1.15;S.pr.raw*=1.15;lg('Feed ingredient prices rose 15%.','warn','Input costs')}}
+
+/* ---- weekly settlement ---- */
+function settle(){const I=S.inv;weeklyVisits();villageSettle();
+ if(S.rent&&n_('store')){const free=Math.max(0,n_('store')*20000-storeKg()-totalKg())*(.5+R_()*.25);rev('Spare storage rental',free*.45);settleCompletedSale('Spare storage rental',free*.45)}
+ S.contracts.filter(c=>c.ty=='store').forEach(c=>{rev('Storage contracts',c.tons*c.rate);settleCompletedSale('Storage contracts',c.tons*c.rate)});
+ if(n_('shop')){supermarketManagerReport(false);}marketingFinanceWeekly();
+ if(S.tourism&&S.tourism.built&&S.tourism.license){const guests=Math.max(3,Math.round(9+R_()*13+(S.tourism.reviews.length>3?3:0)));const stay=guests*(950+R_()*350),activities=guests*(250+R_()*120);S.tourism.guests+=guests;S.tourism.income+=stay+activities;rev('Agritourism stays & farm experiences',stay+activities);settleCompletedSale('Agritourism stays & farm experiences',stay+activities);const review=['Beautiful peaceful farm and welcoming staff.','Loved seeing the fish ponds and green fields.','A lovely rural stay; fresh farm food was a highlight.','Great nature break and a memorable farm tour.','Clean rooms and a relaxing countryside experience.'][Math.floor(R_()*5)];const author=['Mia · UK','Daniel · Germany','Sofia · Italy','Oliver · Australia','Aisha · Bangladesh','Noah · Canada'][Math.floor(R_()*6)];S.tourism.reviews.unshift({author,text:review,stars:4+(R_()<.25?0:1),day:S.dayDone});S.tourism.reviews=S.tourism.reviews.slice(0,12);if(S.tourism.reviews.length%3===1)note('good','Tourist review',author+': “'+review+'”',5)}
+ if(S.week%4===0){const pool=Math.max(0,(S.monthGross||0)*.02);if(pool>0)requestApproval('staff-pool','Combined monthly staff pool (2%)',pool,'One shared pool for farm/factory, supermarket and operations managers, lawyer, doctor and VAT/compliance officer. Not 2% each.');S.monthGross=0;if((S.legal.vatAccrued||0)>0)requestApproval('vat','Monthly VAT/compliance payment',S.legal.vatAccrued,'Prepared by the VAT/compliance officer; review and approve the simulated payment.')}
+ const hd=heads();
+ // Farm/operations managers reduce avoidable overhead; the doctor prevents some health losses;
+ // VAT officer applies simulated, documented input credits; lawyer reviews lawful deductions.
+ const managerSaving=CFG.baseUtil*.10;S.legal.operatingSavings=(S.legal.operatingSavings||0)+managerSaving;const bioCredit=Math.min(CFG.baseUtil-managerSaving,S.biogasSavingsWeek||0);cost('Admin & base utilities after biogas savings',CFG.baseUtil-managerSaving-bioCredit);if(bioCredit>0)S.legal.biogasSavings=(S.legal.biogasSavings||0)+bioCredit;S.biogasSavingsWeek=0;
+ if(S.week%4===0&&(S.legal.vatAccrued||0)>0){const credit=Math.min(S.legal.vatAccrued,(S.legal.vatAccrued||0)*.10);S.legal.vatAccrued-=credit;S.legal.vatSavings=(S.legal.vatSavings||0)+credit;note('good','VAT/compliance officer report','Reviewed records and applied simulated eligible input-tax credits of '+BDT(credit)+'. This reduces estimated VAT legally; the remaining amount still needs your approval.',5)}
+ if(S.week%CFG.taxEvery===0){const before=S.legal.taxAccrued||0;const saving=before*.05;S.legal.taxAccrued=Math.max(0,before-saving);S.legal.taxSavings=(S.legal.taxSavings||0)+saving;if(saving>0)note('good','Lawyer tax review','The lawyer documented simulated lawful deductions and reduced the estimated tax accrual by '+BDT(saving)+'. No tax evasion or unpaid obligation is hidden.',5)}
+ if(S.week%7===0){note('info','Operations manager report','Reviewed purchasing, feed usage, staffing and utility routines. Manager-controlled overhead saved '+BDT(managerSaving)+' this week; supermarket inventory remains managed by the supermarket team, not by you.',5)}
+ cost('Wages ('+hd+' staff)',hd*CFG.wage);
+ for(const k in E)if(E[k].run&&n_(k))cost('Running costs',n_(k)*E[k].run);
+ cost('Loan interest',S.loan*CFG.loanRate/52);
+ if(S.week%CFG.taxEvery==0){const taxable=Math.max(0,S.qrev-S.qcost),t=taxable*CFG.tax;S.qrev=S.qcost=0;if(t>0){S.legal.taxAccrued=(S.legal.taxAccrued||0)+t;requestApproval('tax','Quarterly corporate income tax',S.legal.taxAccrued,'Estimated game tax; legal division prepared the filing.')}}
+ for(const k in P)S.pr[k]=Math.max(P[k].b*.6,S.pr[k]+(P[k].b-S.pr[k])*.2+P[k].b*(R_()-.5)*.1);
+ for(const k in BASEP)S.pr[k]=Math.max(BASEP[k]*.7,S.pr[k]+(BASEP[k]-S.pr[k])*.2+BASEP[k]*(R_()-.5)*.08);
+ let tr=0;for(const l in S.rep.r)tr+=S.rep.r[l];const tc=reportCostsTotal(S.rep.c);
+ S.hist.push(nw());if(S.hist.length>260)S.hist.shift();S.prev=S.rep;S.rep={r:{},c:{}};
+ note(tr-tc>=0?'good':'warn','Weekly report','Week '+S.week+' closed. Revenue '+BDT(tr)+', costs '+BDT(tc)+', net '+BDT(tr-tc)+'. Cash '+BDT(S.cash)+'.',3);S.week++;
+ if(!S.won&&nw()>=1e8){S.won=1;note('good','Milestone','Net worth has passed ৳10 crore. RB Group is now an empire.')}
+ if(S.cash<-500000){S.over=1;note('bad','Bankruptcy','Cash fell below −৳5,00,000. The business has failed. Press Reset to start again.')}}
+
+/* ---- client offers & contracts ---- */
+function offerText(o){const n=S.dayDone;
+ if(o.ty=='store')return o.client+' asks to store '+o.tons+' t of '+(o.cold?'cold-chain':'dry')+' goods for '+o.weeks+' weeks at '+BDT(o.rate)+' per tonne per week.';
+ if(o.ty=='buy')return o.client+' wants '+fmt(o.qty)+' '+P[o.item].u+' of '+P[o.item].n.toLowerCase()+' at '+BDT(o.price)+'/'+P[o.item].u+', delivered within '+(o.due-n)+' days.';
+ if(o.ty==='power')return o.client+' asks for '+o.vol+' kWh/day of solar electricity at '+BDT(o.price)+'/kWh for '+o.weeks+' weeks.';
+ return o.client+' requests '+o.vol+' m³/day of biogas at '+BDT(o.price)+'/m³ for '+o.weeks+' weeks.'}
+function offersDaily(){const n=S.dayDone;if(S.offers.length>=5||R_()>.45)return;const r=R_(),cl=CL[R_()*CL.length|0];let o;
+ if(S.solar&&S.solar.arrays>0&&r>.82)o={ty:'power',vol:Math.round(20+R_()*Math.min(120,S.solar.arrays*70)),price:+(12+R_()*8).toFixed(1),weeks:Math.round(4+R_()*20),client:'Monohardi Village Cooperative'};
+ else if(r<.3)o={ty:'store',tons:Math.round(5+R_()*25),weeks:Math.round(4+R_()*22),rate:Math.round(380+R_()*220),cold:R_()<.5};
+ else if(r<.8){const it=Object.keys(P)[R_()*4|0],q={fish:[300,1500],veg:[200,900],milk:[200,800],egg:[1000,5000]}[it];
+  const qty=Math.round((q[0]+R_()*(q[1]-q[0]))/50)*50;
+  const normalDue=n+3+(R_()*5|0);
+  // If vegetables must be grown first, give the client a deadline after the next crop harvest.
+  const due=it==='veg'&&S.inv.veg<qty?Math.max(normalDue,n+vegHarvestDays()+2):normalDue;
+  o={ty:'buy',item:it,qty,price:+(S.pr[it]*(1.04+R_()*.2)).toFixed(1),due}}
+ else o={ty:'gas',vol:Math.round(8+R_()*32),price:+(48+R_()*14).toFixed(1),weeks:Math.round(8+R_()*44)};
+ o.client=cl;o.id=S.nid++;o.exp=n+3+(R_()*3|0);S.offers.push(o);note('offer','New client request',offerText(o),2);if(R_()<.5)queueVisit({veh:'car',to:'admin',text:cl+' — visiting about a deal',dwell:7})}
+function accept(id){const o=S.offers.find(x=>x.id==id);if(!o)return;const n=S.dayDone;
+ if(o.ty=='store'){if(!n_('store')||storeFree()<o.tons)return note('warn','Cannot accept','Free store space is '+storeFree().toFixed(1)+' t; '+o.tons+' t needed. Build a store or reduce stock first.',2);
+  S.contracts.push({ty:'store',client:o.client,tons:o.tons,rate:o.rate,end:n+o.weeks*7});queueVisit({veh:'truck',col:0x3a7ac8,cargo:o.cold?0xdff1fb:0xc8b48a,to:'store',text:o.client+' — delivering '+o.tons+' t',dwell:12})}
+ else if(o.ty=='buy'){
+  const due=o.item==='veg'&&S.inv.veg<o.qty?Math.max(o.due,n+vegHarvestDays()+2):o.due;
+  S.contracts.push({ty:'buy',client:o.client,item:o.item,qty:o.qty,price:o.price,due});
+ }
+ else if(o.ty==='gas'){if(!n_('bio')||gasCommit()+o.vol>Math.max(0,Math.min(n_('bio')*60,(n_('dairy')*18+n_('poul')*500*.08)*.35)-6))return note('warn','Cannot accept','⚠ Risk warning: not enough digester capacity for '+o.vol+' m³/day. Decline this request or increase waste/gas capacity first.',0);
+  S.contracts.push({ty:'gas',client:o.client,vol:o.vol,price:o.price,end:n+o.weeks*7});queueVisit({veh:'tanker',to:'util',text:o.client+' — biogas tanker',dwell:10});
+  const out=Math.max(0,Math.min(n_('bio')*60,(n_('dairy')*18+n_('poul')*500*.08)*.35)-6);if(out<gasCommit())note('warn','Supply risk','Current gas output (~'+Math.max(0,Math.round(out))+' m³/day surplus) is below your commitments. Shortfalls are penalised.',0)}
+ else if(o.ty==='power'){const z=S.solar||{arrays:0,capacityPerArray:80};const free=Math.max(0,z.arrays*z.capacityPerArray-z.arrays*5-S.contracts.filter(c=>c.ty==='power').reduce((a,c)=>a+c.vol,0));if(!z.arrays||o.vol>free)return note('warn','Cannot accept electricity contract','⚠ Not enough uncommitted solar supply. Decline this request or install more arrays first.',4);S.contracts.push({ty:'power',client:o.client,vol:o.vol,price:o.price,end:n+o.weeks*7,delivered:0});queueVisit({veh:'van',to:'util',text:o.client+' — village electricity connection',dwell:8})}
+ S.offers=S.offers.filter(x=>x.id!=id);note('good','Contract signed','Accepted: '+o.client+'.',2);contractsDaily();ui()}
+function decline(id){S.offers=S.offers.filter(x=>x.id!=id);ui()}
+function contractsDaily(){const n=S.dayDone;
+ S.contracts.filter(c=>c.ty=='buy').forEach(c=>{
+  if(S.inv[c.item]>=c.qty){S.inv[c.item]-=c.qty;rev('Client orders',c.qty*c.price);settleCompletedSale('Client order — '+c.client,c.qty*c.price);visitFor(c.item,c.client,'collecting '+fmt(c.qty)+' '+P[c.item].u+' of '+P[c.item].n.toLowerCase());note('good','Order delivered',c.client+' received '+fmt(c.qty)+' '+P[c.item].u+' of '+P[c.item].n.toLowerCase()+'. '+BDT(c.qty*c.price)+' paid.',3);c.done=1}
+  else if(n>=c.due){const pen=c.qty*c.price*.08;cost('Order penalty',pen);note('bad','Order failed',c.client+"'s order was missed (stock "+fmt(S.inv[c.item])+' of '+fmt(c.qty)+'). Penalty '+BDT(pen)+'.',3);c.done=1}});
+ S.contracts.forEach(c=>{if(c.ty!='buy'&&n>=c.end){c.done=1;note('info','Contract ended',c.client+(c.ty=='gas'?' biogas supply':c.ty=='power'?' electricity supply':' storage')+' contract has ended.',2)}});
+ S.contracts=S.contracts.filter(c=>!c.done);
+ S.offers=S.offers.filter(o=>{if(n>=o.exp){note('info','Offer expired',o.client+"'s request lapsed.");return false}return true})}
+
+/* ---- manager watch-list ---- */
+function cdn(k,days){const n=S.dayDone;if((S.cool[k]===undefined?-99:S.cool[k])+days>n)return false;S.cool[k]=n;return true}
+function watch(){const n=S.dayDone,I=S.inv;
+ if(S.ai&&S.ai.accountant&&currentOperatingProfit()<0&&cdn('accountant-loss',3))note('warn','Accountant · Profit warning','Current-week operating result is '+BDT(currentOperatingProfit())+'. Review Finance, avoid optional expansion and protect a four-week fixed-cost reserve of '+BDT(weeklyFixed()*4)+'. The accountant will not borrow, sign contracts or spend capital without your approval.',3);
+ if(S.cash<0){if(cdn('neg',5))note('bad','Cash overdrawn','Balance is '+BDT(S.cash)+'. Sell stock or borrow; below −৳5,00,000 the business fails.',3)}
+ else if(S.cash<400000&&cdn('low',7))note('warn','Low cash','Only '+BDT(S.cash)+' left. Fixed costs run about '+BDT(weeklyFixed())+' per week.',3);
+ if(!n_('mill')&&weekUse()>0&&I.feed<weekUse()*.3&&cdn('feed',4))note('warn','Feed running low','Stock covers ~'+(I.feed/(weekUse()/7)).toFixed(1)+' days. I am buying at market +12%. A feed mill would cut this cost.',0);
+ const idle=['fish','crop'].reduce((s,k)=>s+S.u[k].filter(u=>u.p<0).length,0);if(idle&&!S.auto&&cdn('idle',5))note('warn','Idle units',idle+' pond/plot unit(s) are idle. Restock them or enable auto-restock.',0);
+ const held=Object.keys(P).filter(k=>S.hold[k]&&I[k]>200);if(held.length&&cdn('held',6))note('info','Held stock','Holding '+held.map(k=>P[k].n.toLowerCase()).join(', ')+'. Spoilage applies unless it fits in cold storage.',1);
+ if(S.week%CFG.taxEvery==0&&n%7==0&&cdn('tax',20))note('info','Tax due','Quarterly income tax falls due at the end of this week (estimate '+BDT(Math.max(0,(S.qrev-S.qcost)*CFG.tax))+'). Keep this amount available if possible.',3);
+ // A concise, cash-aware manager briefing: at most once every in-game week.
+ if(n%7===0&&cdn('action-plan',7)){
+  const stock=Object.keys(P).filter(k=>I[k]>Math.max(100,P[k].cap*.25)).sort((a,b)=>(I[b]*S.pr[b])-(I[a]*S.pr[a]));
+  const openBuy=S.offers.filter(o=>o.ty==='buy').length,openStore=S.offers.filter(o=>o.ty==='store').length,openGas=S.offers.filter(o=>o.ty==='gas').length;
+  let advice='Cash is '+BDT(S.cash)+'. ';
+  if(S.cash<400000) advice+='Priority: protect cash. Approve a market sale for available stock, pause new construction, and avoid accepting contracts that need spending before payment. ';
+  else if(S.cash<1200000) advice+='Keep a reserve for wages, utilities and feed. Sell stored products before investing in new buildings. ';
+  else advice+='Keep enough working capital for at least the next weekly payroll and operating costs before expanding. ';
+  if(stock.length) advice+='Best immediate cash opportunity: review '+P[stock[0]].n.toLowerCase()+' stock ('+fmt(I[stock[0]])+' '+P[stock[0]].u+') in Market and approve a suitable sale. ';
+  else advice+='No large spot-market stock is waiting to sell; check upcoming harvests and daily milk/egg output. ';
+  if(openBuy+openStore+openGas) advice+='There are '+(openBuy+openStore+openGas)+' open client offer(s) ('+openBuy+' produce, '+openStore+' storage, '+openGas+' biogas). Accept only if stock, capacity, deadline and cash flow are safe. ';
+  if(I.feed<weekUse()*1.5) advice+='Feed cover is under about 10 days: check feed stock and budget before adding livestock. ';
+  if(n_('store')===0&&(I.milk>100||I.egg>500||I.fish>500||I.veg>500)) advice+='You have no cold/dry store; consider storage if affordable to reduce spoilage. ';
+  note(S.cash<0?'bad':S.cash<400000?'warn':'info','Manager action plan',advice, S.cash<400000?3:1);
+ }
+ if(S.tip<TIPS.length&&n>=TIPS[S.tip][0])note('info','Tip',TIPS[S.tip++][1])}
+
+/* ---- clock ---- */
+function tickTime(dt){if(S.over||modal||!S.speed)return;S.t+=dt*TIME.speeds[S.speed]*TIME.base/60;let g=0;
+ while(S.dayDone<Math.floor(S.t/1440)&&g++<30)newDay()}
+function newDay(){if(S.dayDone>0){const ds=Number(S.dailyGrossSales)||0,dv=Number(S.dailyVatAccrued)||0;note('info','Daily finance & tax update','Previous game day gross sales: '+BDT(ds)+'. VAT for that day (0.2%): '+BDT(dv)+'. Total unpaid VAT accrued: '+BDT(S.legal&&S.legal.vatAccrued||0)+'. Estimated income tax rate: 0.2% of positive quarterly profit; accrued tax: '+BDT(S.legal&&S.legal.taxAccrued||0)+'. All values are simulated; review Finance and Legal & Compliance for details.',5)}S.dailyGrossSales=0;S.dailyVatAccrued=0;S.dayDone++;const n=S.dayDone;day();if(n%7==0){settle();if(!S.over)event()}contractsDaily();offersDaily();watch();updVis();
+  if(R_()<.78)queueVisit({veh:R_()<.18?'bus':'car',to:R_()<.45?'agri':R_()<.7?'fishery':'tour',text:'Farm visitor — arriving to explore and buy farm products',dwell:12});
+  if(R_()<.12)queueVisit({veh:'car',to:'lot',notag:1,dwell:14});if(S.over)S.speed=0;if(n%3==0)save()}
+
+function buildTourism(){S.tourism=S.tourism||{built:0,license:0,guests:0,reviews:[],income:0};if(S.tourism.built)return;if(S.cash<850000){note('warn','Not enough cash','The park costs ৳8.5 lakh. Current cash is '+BDT(S.cash)+'.',0);return}S.cash-=850000;S.capex=(S.capex||0)+850000;S.tourism.built=1;S.tourism.reviews=[];note('good','RB Farm Stay cottage built','The visible guest cottage is inside your farm boundary. Capacity is 5 guests; rate is ৳11,000 per occupied building per day. Guests must request a stay and you must approve check-in.',0);bTour();ui();hud();save()}
+function applyTourLicense(){if(!S.tourism.built||S.tourism.license||S.cash<75000)return;requestApproval('tour-license','Agritourism operating licence',75000,'Low-cost simulated government licence fee. Your approval is required before the park can accept paying guests.');ui();save()}
+/* ---- solar electricity and AI-style managers ---- */
+function buildSolar(){const s=S.solar|| (S.solar={arrays:0,price:18,capacityPerArray:80,costPerArrayDay:250,lifeSales:0,lifeCosts:0,energyUsed:0});if(s.arrays>=8)return note('warn','Solar capacity limit','Maximum 8 solar arrays in this phase.',4);const cost=350000;if(S.cash<cost)return note('warn','Not enough cash','One solar array costs ৳3,50,000.',4);S.cash-=cost;S.capex=(S.capex||0)+cost;s.arrays++;if(typeof bUtil==='function')bUtil();note('good','Solar array installed','Array '+s.arrays+' installed. Modelled output is up to '+(s.arrays*s.capacityPerArray)+' kWh/day before farm use. Electricity Manager will monitor village demand and contracts.',4);ui();hud();save()}
+function setSolarPrice(v){const n=Number(v);if(!Number.isFinite(n)||n<1||n>100)return note('warn','Invalid tariff','Set a village tariff between ৳1 and ৳100 per kWh.',4);S.solar.price=n;note('good','Village tariff updated','Solar electricity tariff set to '+BDT(n)+'/kWh.',4);ui();save()}
+function toggleAI(k){S.ai=S.ai||{};S.ai[k]=S.ai[k]?0:1;note('info','Manager setting changed',(k==='energy'?'Electricity & Biogas Manager':k==='accountant'?'Accountant':'Policy')+' automation '+(S.ai[k]?'enabled':'paused')+'.',5);ui();save()}
+function energyDay(){const z=S.solar;if(!z||z.arrays<1)return;const produced=z.arrays*z.capacityPerArray;const own=Math.min(produced,z.arrays*5);z.energyUsed=(z.energyUsed||0)+own;const running=z.arrays*z.costPerArrayDay;cost('Solar arrays — daily maintenance & operation',running);z.lifeCosts=(z.lifeCosts||0)+running;let available=Math.max(0,produced-own);
+ // Electricity manager honours signed contracts first, then sells remaining power to villagers.
+ const cs=S.contracts.filter(c=>c.ty==='power');for(const c of cs){const delivered=Math.min(available,c.vol);if(delivered>0){rev('Village electricity contracts',delivered*c.price);settleCompletedSale('Village electricity contracts',delivered*c.price);available-=delivered;c.delivered=(c.delivered||0)+delivered}
+ if(delivered<c.vol){const penalty=(c.vol-delivered)*c.price*.2;cost('Electricity shortfall penalty',penalty);if(S.ai.energy&&cdn('power-short-'+c.client,3))note('warn','Electricity shortfall','Solar output could not cover '+c.vol+' kWh/day for '+c.client+'. Shortfall penalty '+BDT(penalty)+'. Avoid new commitments and review capacity.',4)}}
+ const villageDemand=180;const sold=Math.min(available,villageDemand);
+ // Accountant's programmable profit guard: if the planned village sale cannot cover daily solar running cost, adjust tariff within the configured cap.
+ if(S.ai&&S.ai.accountant&&S.ai.autoPrice&&sold>0&&sold*z.price<running){const old=z.price;z.price=Math.min(100,Math.ceil((running*1.2)/sold));if(z.price>old&&cdn('solar-tariff-adjust',7))note('info','Accountant adjusted solar tariff','Expected village sales would not cover solar running cost. Tariff automatically adjusted from '+BDT(old)+' to '+BDT(z.price)+'/kWh to target a 20% operating cushion, subject to the ৳100 cap.',5)}
+ if(sold>0){const amount=sold*z.price;rev('Solar electricity sold to villagers',amount);settleCompletedSale('Solar electricity sold to villagers',amount);z.lifeSales=(z.lifeSales||0)+amount;available-=sold}
+ if(S.ai.energy&&cdn('solar-daily-report',7))note('info','Electricity Manager report','Solar output '+fmt(produced)+' kWh/day; farm use '+fmt(own)+'; contracted sales '+fmt(cs.reduce((a,c)=>a+Math.min(c.vol,produced),0))+'; sold to villagers today '+fmt(sold)+' kWh; unused surplus '+fmt(available)+' kWh. Daily running cost '+BDT(running)+'.',4);
+}
+function solarCard(){const z=S.solar||{arrays:0,price:18,capacityPerArray:80,costPerArrayDay:250,lifeSales:0,lifeCosts:0};const prod=z.arrays*z.capacityPerArray, own=z.arrays*5, free=Math.max(0,prod-own),dailyCost=z.arrays*z.costPerArrayDay, village=Math.min(Math.max(0,free-S.contracts.filter(c=>c.ty==='power').reduce((a,c)=>a+c.vol,0)),180),estimate=village*z.price-dailyCost;return '<div class=card><div class=r><b>☀️ RB Solar & Village Electricity</b><span>'+z.arrays+'/8 arrays</span></div><div class=sm>Modelled output: '+fmt(prod)+' kWh/day · farm use: '+fmt(own)+' · before contracts, potential village sales: '+fmt(Math.min(free,180))+' kWh/day. Assumed installation cost ৳3.5 lakh per array; running cost ৳250 per array/day. These are game settings, not real-world quotes.</div><div class=r><span>Village tariff (৳/kWh)</span><span><input id=solarPrice type=number min=1 max=100 value='+z.price+' style=width:85px><button onclick="setSolarPrice(document.getElementById(\'solarPrice\').value)">Set tariff</button></span></div><div class=r><span>Potential daily margin before contract penalties</span><b class='+(estimate>=0?'pos':'neg')+'>'+BDT(estimate)+'</b></div><div class=r><span>Lifetime electricity sales</span><b>'+BDT(z.lifeSales||0)+'</b></div><div class=r><span>Lifetime operating cost</span><b>'+BDT(z.lifeCosts||0)+'</b></div><button class=pri '+(z.arrays>=8||S.cash<350000?'disabled':'')+' onclick="buildSolar()">+ Install solar array · ৳3,50,000</button></div>'}
+function aiControlCard(){return '<div class=card><b>🤖 Programmable managers</b><div class=sm>These are in-game rule-based AI managers, not an online AI service. They monitor figures and take the actions listed below; you keep final control over contracts and expansion.</div><div class=r><span>⚡ Electricity & Biogas Manager</span><button onclick="toggleAI(\'energy\')">'+(S.ai.energy?'Pause auto-monitoring':'Enable auto-monitoring')+'</button></div><div class=sm>Tracks solar output, gas commitments and shortfalls; reports risks. Automatically sells surplus solar power to villagers after farm use and contracted supply.</div><div class=r><span>Accountant may auto-adjust solar tariff</span><button onclick="S.ai.autoPrice=S.ai.autoPrice?0:1;save();ui()">'+(S.ai.autoPrice?'Enabled':'Paused')+'</button></div><div class=r><span>📒 Accountant / Profit Guard</span><button onclick="toggleAI(\'accountant\')">'+(S.ai.accountant?'Pause profit guard':'Enable profit guard')+'</button></div><div class=sm>Reviews current-week income and operating costs, warns when cash is low, and recommends delaying expansion if cash would fall below a four-week operating reserve. It will not accept contracts, borrow money or spend capital without your approval.</div></div>'}
+/* ---- player actions ---- */
+function buy(k){const e=E[k];if(n_(k)>=e.max)return;const firstFreeStore=k==='store'&&n_('store')===0;const price=firstFreeStore?0:e.cap;if(S.cash<price)return;S.cash-=price;S.capex+=price;S.u[k].push({p:e.cyc?-1:0,y:1});if(S.auto)restock();note('good','Built',e.n+(firstFreeStore?' added free as your starter warehouse.':' added.'),0);rebuild(k);ui();hud();updVis()}
+function buyLic(){if(S.lic||!n_('store')||S.cash<CFG.licFee)return;S.cash-=CFG.licFee;S.lic=1;note('good','Export license','License acquired. Fish can now be exported.',4);ui();hud()}
+function loan(a){if(a>0){if(S.loan+a>CFG.loanMax){note('warn','Bank limit','Borrowing limit is '+BDT(CFG.loanMax)+'.',3);return}S.cash+=a;S.loan+=a}else{const r=Math.min(-a,S.loan,Math.max(0,S.cash));S.cash-=r;S.loan-=r}ui();hud()}
+/* ===================== UI ===================== */
+function stat(k){const u=S.u[k],n=u.length,e=E[k];if(!n)return'Not built yet';
+ if(e.cyc)return u.map((x,i)=>'#'+(i+1)+' '+(x.p<0?'<i>idle</i>':Math.floor(x.p)+'/'+e.cyc+'w')).join(' · ')+' — '+e.out[1]+' kg/cycle';
+ return{dairy:n+' cows · ~'+n*70+' L/wk · feed '+n*50+' kg/wk',poul:n*500+' layers · ~'+(n*2800).toLocaleString()+' eggs/wk · feed '+n*385+' kg/wk',
+ mill:(n*2000).toLocaleString()+' kg/wk · feed stock '+Math.round(S.inv.feed).toLocaleString()+' kg',bio:'~'+Math.round(Math.max(0,Math.min(n*60,(n_('dairy')*18+n_('poul')*500*.08)*.35)))+' m³ gas/day',
+ store:n*20+' t space · '+(totalKg()/1000).toFixed(1)+' t in use',shop:n+' outlet(s) · retail manager reports weekly · setup '+BDTshort(e.cap)}[k]}
+function ops(){let h='<div class=sm>Click a zone on the map to focus it. Simulated farm date: <b>'+gameDayDate(S.dayDone)+'</b>.</div>';
+ for(const k of['fish','crop','dairy','poul','mill','bio','store','shop']){const e=E[k];
+  h+='<div class="card'+(sel&&ZE[sel]==k?' sel':'')+'"><div class=r><b>'+e.n+'</b><span>'+n_(k)+'/'+e.max+'</span></div><div class=sm>'+stat(k)+'</div><button '+(n_(k)>=e.max||S.cash<e.cap?'disabled':'')+' onclick="buy(\''+k+'\')">+ Build · '+BDTshort(e.cap)+'</button></div>'}
+ h+=solarCard();
+ h+='<div class="card'+(sel=='tour'?' sel':'')+'"><div class=r><b>🌿 RB Farm Stay — guest cottage</b><span>'+(S.tourism&&S.tourism.built?'BUILT':'NOT BUILT')+'</span></div><div class=sm>'+(S.tourism&&S.tourism.built?('Location: inside the farm boundary near administration. Capacity: 5 guests at a time. Rate: ৳11,000 per occupied cottage per day. Status: '+(S.tourism.booking?'OCCUPIED · '+S.tourism.booking.guests+' guest(s), '+S.tourism.booking.daysLeft+' day(s) left':S.tourism.license?'OPEN — waiting for your booking approval':'Licence pending')+' · lifetime income: '+BDT(S.tourism.income||0)):'The RB Farm Stay cottage is already unlocked in the existing guest-stay plot. Guests request stays; you approve or decline before check-in.')+'</div><button '+(S.tourism&&S.tourism.built||S.cash<850000?'disabled':'')+' onclick=buildTourism()>Build guest cottage · ৳8.5 lakh</button> '+(S.tourism&&S.tourism.built&&!S.tourism.license?'<button '+(S.cash<75000?'disabled':'')+' onclick=applyTourLicense()>Request licence · ৳75,000</button>':'')+'</div>';
+ h+='<div class=card><b>📅 Harvest calendar — plan offers before accepting</b><div class=sm>Estimated dates update as game days pass. These are harvest-ready dates, not guaranteed delivery dates; allow time for harvesting, packing and transport.</div><div style=margin-top:7px><b>🐟 Fish ponds</b>'+harvestSchedule('fish')+'</div><div style=margin-top:7px><b>🥬 Vegetable plots</b>'+harvestSchedule('crop')+'</div></div>';
+ return h+hospitalityHtml()+'<label><input type=checkbox '+(S.auto?'checked':'')+' onchange="S.auto=this.checked?1:0;if(S.auto)restock();ui()"> Auto-restock ponds & plots</label><label><input type=checkbox '+(S.rent?'checked':'')+' onchange="S.rent=this.checked?1:0"> Rent out spare cold-store space</label>'}
+function mkt(){
+ let h='<div class=sm>Products are not sold automatically. Set your asking price and quantity, then approve each sale yourself. Market reference prices are simulated in-game prices, not live Bangladesh market quotes. Product prices can fluctuate weekly; edit the asking price for each sale.</div>';
+ h+='<table><tr><th>Product / stock</th><th>Reference price</th><th>Your price</th><th>Quantity to sell</th><th>Action</th></tr>';
+ for(const k in P){const p=P[k],pr=S.pr[k],avail=Math.max(0,S.inv[k]-resv(k));
+  h+='<tr><td><b>'+p.n+'</b><br><span class=sm>Available: '+fmt(avail)+' '+p.u+'</span></td><td>'+BDT(pr)+'/'+p.u+'</td><td><input id=ask_'+k+' type=number min=0.01 step=0.5 value="'+pr.toFixed(2)+'" style="width:78px;background:#0d1218;color:#dce4ec;border:1px solid #34475a;padding:4px;border-radius:4px"></td><td><input id=qty_'+k+' type=number min=0 step=1 value="'+Math.floor(avail)+'" max="'+Math.floor(avail)+'" style="width:78px;background:#0d1218;color:#dce4ec;border:1px solid #34475a;padding:4px;border-radius:4px"></td><td><button '+(avail<1?'disabled':'')+' onclick="approveSale(\''+k+'\',document.getElementById(\'ask_'+k+'\').value,document.getElementById(\'qty_'+k+'\').value)">Approve</button></td></tr>';
+ }
+ h+='</table><div class=card><b>Approval preview</b><div class=sm>Expected revenue = your price × quantity. This is sales revenue, not profit; feed, seed, wages, utilities and other costs remain separate in Finance.</div></div>';
+ h+='<h4>Recent approved sales</h4>';
+ const logs=Array.isArray(S.salesLog)?S.salesLog:[];
+ if(!logs.length)h+='<div class=sm>No market sales yet. Your first approved sale will appear here.</div>';
+ else{h+='<table><tr><th>Week / day</th><th>Product</th><th>Quantity</th><th>Price</th><th>Revenue</th></tr>';logs.slice(0,15).forEach(x=>{h+='<tr><td>W'+x.week+' / D'+x.day+'</td><td>'+P[x.item].n+'</td><td>'+fmt(x.qty)+' '+P[x.item].u+'</td><td>'+BDT(x.price)+'</td><td class=pos>'+BDT(x.revenue)+'</td></tr>'});h+='</table>'}
+ h+='<h4>Farm processing & packaging</h4><div class=card><b>🥚 Packaged egg trays</b><div class=sm>30 farm eggs → 1 tray. Packaging ৳10/tray + grading/packing ৳5/tray. Stock: '+fmt(S.inv.eggTray||0)+' trays.</div><label>Trays to produce <input id=packEggQty type=number min=1 value=10 style=width:75px></label><button '+((S.inv.egg||0)<30?'disabled':'')+' onclick="processPackaged(\'eggTray\',document.getElementById(\'packEggQty\').value)">Grade & pack eggs</button></div><div class=card><b>🐟 Cleaned / packed fish</b><div class=sm>Uses 1 kg farm fish per 1 kg pack; requires a cold/dry store. Packaging ৳12/kg + cleaning/chilling ৳8/kg. Stock: '+fmt(S.inv.frozenFish||0)+' kg packs.</div><label>Kg to pack <input id=packFishQty type=number min=1 value=10 style=width:75px></label><button '+(!n_('store')||(S.inv.fish||0)<1?'disabled':'')+' onclick="processPackaged(\'frozenFish\',document.getElementById(\'packFishQty\').value)">Clean & pack fish</button></div><div class=sm>Farm feed by-products: '+fmt(S.feedRawKg||0)+' kg · feed produced internally: '+fmt(S.feedProducedInternal||0)+' kg · permitted external feed purchased: '+fmt(S.feedExternalBought||0)+' kg · organic waste available for biogas: '+fmt(S.organicWasteKg||0)+' kg.</div>';
+ h+='<h4>Inputs & by-products</h4><div class=sm>Feed price '+BDT(S.pr.feed)+'/kg (market buy +12%) · Raw ingredients '+BDT(S.pr.raw)+'/kg · Biogas '+BDT(S.pr.gas)+'/m³<br>Feed in stock: '+Math.round(S.inv.feed).toLocaleString()+' kg · weekly farm use '+Math.round(weekUse()).toLocaleString()+' kg</div>';
+ return h
+}
+
+function processPackaged(kind,qtyValue){
+ ensureBusinessData();const qty=Math.max(1,Math.floor(Number(qtyValue)||1));
+ if(kind==='eggTray'){
+  const n=Math.min(qty,Math.floor((S.inv.egg||0)/30));if(!n)return note('warn','Not enough eggs','A tray requires 30 eggs; no eggs were consumed.',1);
+  const packaging=n*10,processing=n*5;S.inv.egg-=n*30;S.inv.eggTray=(S.inv.eggTray||0)+n;cost('Egg tray packaging',packaging);cost('Egg grading & packing',processing);S.packaging.eggTrays=(S.packaging.eggTrays||0)+n;S.packaging.packagingCost+=packaging;S.packaging.processingCost+=processing;
+  note('good','Eggs graded and packaged',n+' tray(s) produced from '+(n*30)+' farm eggs. Packaging '+BDT(packaging)+', processing '+BDT(processing)+'.',1);
+ }else if(kind==='frozenFish'){
+  if(!n_('store'))return note('warn','Cold storage required','Build at least one cold/dry store before packing fish for chilled/frozen sale.',0);
+  const n=Math.min(qty,Math.floor(S.inv.fish||0));if(!n)return note('warn','Not enough fish','No farm fish available to pack.',1);
+  const packaging=n*12,processing=n*8;S.inv.fish-=n;S.inv.frozenFish=(S.inv.frozenFish||0)+n;cost('Fish pack packaging',packaging);cost('Fish cleaning & chilling',processing);S.packaging.fishPacks=(S.packaging.fishPacks||0)+n;S.packaging.packagingCost+=packaging;S.packaging.processingCost+=processing;
+  note('good','Fish cleaned and packed',n+' kg of packed fish produced. Packaging '+BDT(packaging)+', processing/cold-chain '+BDT(processing)+'.',1);
+ }
+ ui();hud();save();
+}
+
+function spark(){const h=S.hist,mx=Math.max(...h),mn=Math.min(...h),w=360,ht=60;
+ const pts=h.map((v,i)=>(i/Math.max(1,h.length-1)*w).toFixed(1)+','+(ht-(v-mn)/((mx-mn)||1)*ht).toFixed(1)).join(' ');
+ return'<svg width='+w+' height='+(ht+4)+' style="background:#10180e;border-radius:4px"><polyline fill=none stroke="#a6dc6e" stroke-width=2 points="'+pts+'"/></svg>'}
+function fin(){const rp=S.rep||{r:{},c:{}};let tr=0,tc=0,h='<div class=card><div class=r><span>Cash</span><b>'+BDT(S.cash)+'</b></div><div class=r><span>Loan ('+(CFG.loanRate*100)+'% p.a.)</span><b>'+BDT(S.loan)+'</b></div><div class=r><span>Net worth</span><b>'+BDT(nw())+'</b></div><div class=r><span>Tax this quarter (est.)</span><b>'+BDT(Math.max(0,(S.qrev-S.qcost)*CFG.tax))+'</b></div>'+
+ '<div class=r><span>Accrued simulated VAT (0.2% of all recorded revenue)</span><b>'+BDT(S.legal&&S.legal.vatAccrued||0)+'</b></div><div class=r><span>Automatic sale-linked principal repaid (cumulative)</span><b>'+BDT(Number(S.loanPrincipalRepaidTotal)||((S.loanRepayments||[]).reduce((a,x)=>a+x.amount,0)))+'</b></div><div class=r><span>Packaging costs to date</span><b>'+BDT(S.packaging&&S.packaging.packagingCost||0)+'</b></div><div class=r><span>Processing costs to date</span><b>'+BDT(S.packaging&&S.packaging.processingCost||0)+'</b></div><button onclick="loan(1000000)">Borrow ৳10 lakh</button> <button onclick="loan(-1000000)">Repay ৳10 lakh</button></div>'+spark()+'<h4>This week so far — income & expenses</h4><table>';
+ for(const l in rp.r){tr+=rp.r[l];h+='<tr><td>'+l+'</td><td class=pos>'+BDT(rp.r[l])+'</td></tr>'}
+ for(const l in rp.c){const principal=isPrincipalRepaymentLabel(l);if(!principal)tc+=rp.c[l];h+='<tr><td>'+(principal?'Loan principal repayment (cash flow; excluded from profit)':l)+'</td><td class=neg>-'+BDT(rp.c[l])+'</td></tr>'}
+ h+='<tr><td><b>Operating net result (principal excluded)</b></td><td class='+(tr-tc>=0?'pos':'neg')+'><b>'+BDT(tr-tc)+'</b></td></tr></table>';if(S.prev){let pRev=0,pCost=0;for(const l in (S.prev.r||{}))pRev+=Number(S.prev.r[l])||0;for(const l in (S.prev.c||{}))if(!isPrincipalRepaymentLabel(l))pCost+=Number(S.prev.c[l])||0;h+='<div class=card><b>Last completed week</b><div class=r><span>Revenue</span><b>'+BDT(pRev)+'</b></div><div class=r><span>Operating costs incl. VAT accrual</span><b>'+BDT(pCost)+'</b></div><div class=r><span>Operating result (principal excluded)</span><b class='+(pRev-pCost>=0?'pos':'neg')+'>'+BDT(pRev-pCost)+'</b></div></div>'}h+='<h4>Recent automatic loan repayments</h4>';
+ const lr=S.loanRepayments||[];h+=lr.length?lr.slice(0,8).map(x=>'<div class=msg><b>'+x.label+'</b> — '+BDT(x.gross)+' sale · principal repaid '+BDT(x.amount)+' · W'+x.week+'/D'+x.day+'</div>').join(''):'<div class=sm>No automatic repayments yet. They occur only after completed sales and only while a loan balance remains.</div>';
+ return h}
+function exp(){const e=E.shop;
+ return solarCard()+aiControlCard()+'<div class=card><div class=r><b>🛒 RB Fresh Mart supermarkets</b><span>'+n_('shop')+'/3</span></div><div class=sm>Retail your own produce at +28% and trade groceries (14% margin). ~6 staff each. Built beside the south road.</div><button '+(n_('shop')>=3||S.cash<e.cap?'disabled':'')+' onclick="buy(\'shop\')">+ Build · '+BDTshort(e.cap)+'</button></div>'+
+ '<div class=card><div class=r><b>🚢 Export license</b><span>'+(S.lic?'Active':'Locked')+'</span></div><div class=sm>Fish exported at +40% (max 2,500 kg/wk, 2% fee, ৳8/kg logistics). Needs at least one cold store.</div><button '+(S.lic||!n_('store')||S.cash<CFG.licFee?'disabled':'')+' onclick="buyLic()">Buy license · '+BDT(CFG.licFee)+'</button></div>'+
+ '<div class=card><b>🌱 Integrated-resource rule</b><div class=sm>Farm by-products can replace part of purchased feed and compost inputs. Farm-grown crop by-products are routed to the feed mill first. External feed purchases are capped at 2% of daily demand; any remaining shortage is explicitly reported rather than silently filled. Organic waste/manure feeds digesters without raw-material purchase charges.</div></div>'}
+/* ===================== MANAGER, OFFERS & INTERFACE ===================== */
+const TABS=['Operations','Market','Offers','Finance','Expansion','Manager','Chat','Village'];
+const pad=n=>String(Math.floor(n)).padStart(2,'0');
+const stamp=t=>DAYN[Math.floor(t/1440)%7]+' '+pad(t%1440/60)+':'+pad(t%60);
+function toast(n){const c=$('toasts');while(c.children.length>=3)c.removeChild(c.firstChild);const d=document.createElement('div');d.className='toast '+n.ty;
+ d.innerHTML='<div class=av>'+AV+'</div><div class=bub><small>'+CFG.manager+(n.title?' · '+n.title:'')+'</small>'+n.text+(n.go!=null?'<br><a onclick="tab='+n.go+';ui()">Open</a>':'')+'</div>';
+ c.appendChild(d);setTimeout(()=>d.remove(),n.ty=='offer'?15000:9000)}
+function offersPane(){let h='<h4>Client requests ('+S.offers.length+')</h4>';
+ if(!S.offers.length)h+='<div class=sm>No open requests. The manager will alert you when a client calls.</div>';
+ S.offers.forEach(o=>{const left=o.exp-S.dayDone;let t,d,ok=true;
+  if(o.ty=='store'){t='Storage request';const fr=storeFree();ok=n_('store')&&fr>=o.tons;
+   d=o.tons+' t '+(o.cold?'cold-chain':'dry')+' goods · '+o.weeks+' weeks · '+BDT(o.rate)+'/t/week = <b>'+BDT(o.tons*o.rate)+'/week</b><br><span class=sm>Free store space: '+fr.toFixed(1)+' t'+(ok?'':' — not enough')+'</span>'}
+  else if(o.ty=='buy'){t='Purchase order';const pn=P[o.item];
+   let harvestNote='';if(o.item==='fish'||o.item==='veg'){const key=o.item==='fish'?'fish':'crop',hi=harvestInfo(key),days=hi.first,stockNow=Math.max(0,S.inv[o.item]-resv(o.item));if(stockNow>=o.qty)harvestNote='Stock check: enough unreserved stock is already available.';else if(days!==null)harvestNote='Next expected '+pn.n.toLowerCase()+' harvest: '+gameDayDate(S.dayDone+days)+' ('+days+' day'+(days===1?'':'s')+' away). '+(days>o.due-S.dayDone?'⚠ Harvest is expected after this offer deadline.':'Compare this date with the deadline and leave time for packing and delivery.');else harvestNote='No active growing cycle found; start/replant production before promising a future harvest.';harvestNote='<br><span class=sm>'+harvestNote+'</span>'}
+   d=fmt(o.qty)+' '+pn.u+' of '+pn.n.toLowerCase()+' at '+BDT(o.price)+'/'+pn.u+' (market '+BDT(S.pr[o.item])+') = <b>'+BDT(o.qty*o.price)+'</b><br><span class=sm>Deliver within '+(o.due-S.dayDone)+' days · in stock '+fmt(S.inv[o.item])+' '+pn.u+' · late = 8% penalty</span>'+harvestNote}
+  else if(o.ty==='gas'){t='Biogas supply contract';const free=Math.max(0,Math.min(n_('bio')*60,(n_('dairy')*18+n_('poul')*500*.08)*.35)-6-gasCommit());ok=n_('bio')&&o.vol<=free;
+   d=o.vol+' m³/day at '+BDT(o.price)+'/m³ (spot '+BDT(S.pr.gas)+') for '+o.weeks+' weeks = <b>'+BDT(o.vol*7*o.price)+'/week</b><br><span class=sm>Uncommitted safe capacity: '+free+' m³/day</span><div class=sm style="color:'+(ok?'#48b982':'#ff7777')+';font-weight:700">'+(ok?'✓ LOWER RISK — capacity currently covers this request. Check waste supply before accepting.':'⚠ HIGH RISK — DO NOT ACCEPT: this exceeds estimated uncommitted gas capacity. Decline or expand production first.')+'</div>'}
+  else if(o.ty==='power'){t='☀️ Village electricity request';const z=S.solar||{arrays:0,capacityPerArray:80};const free=Math.max(0,z.arrays*z.capacityPerArray-z.arrays*5-S.contracts.filter(c=>c.ty==='power').reduce((a,c)=>a+c.vol,0));ok=z.arrays>0&&o.vol<=free;
+   d=o.vol+' kWh/day at '+BDT(o.price)+'/kWh for '+o.weeks+' weeks = <b>'+BDT(o.vol*7*o.price)+'/week</b><br><span class=sm>Estimated uncommitted supply: '+free+' kWh/day</span><div class=sm style="color:'+(ok?'#48b982':'#ff7777')+';font-weight:700">'+(ok?'✓ LOWER RISK — estimated solar capacity covers this request. Check the expected margin.':'⚠ HIGH RISK — DO NOT ACCEPT: not enough uncommitted solar capacity. Decline or install more arrays first.')+'</div>'}
+  h+='<div class="card offer"><div class=r><b>'+t+'</b><span class=sm>'+left+' day(s) left</span></div><div class=sm>'+o.client+'</div><div>'+d+'</div><div class=r style="margin:6px 0 0"><button class=pri '+(ok?'':'disabled')+' onclick="accept('+o.id+')">Accept</button><button onclick="decline('+o.id+')">Decline</button></div></div>'});
+ h+='<h4>Active contracts ('+S.contracts.length+')</h4>';if(!S.contracts.length)h+='<div class=sm>None yet.</div>';
+ S.contracts.forEach(c=>{let s;
+  if(c.ty=='store')s='Storage · '+c.tons+' t · '+BDT(c.tons*c.rate)+'/week · '+Math.max(0,Math.ceil((c.end-S.dayDone)/7))+' wk left';
+  else if(c.ty=='buy')s='Order · '+fmt(c.qty)+' '+P[c.item].u+' '+P[c.item].n.toLowerCase()+' · due in '+Math.max(0,c.due-S.dayDone)+' d · stock '+fmt(S.inv[c.item]);
+  else if(c.ty==='power')s='Village electricity · '+c.vol+' kWh/day at '+BDT(c.price)+'/kWh · '+Math.max(0,Math.ceil((c.end-S.dayDone)/7))+' wk left';
+  else s='Biogas · '+c.vol+' m³/day at '+BDT(c.price)+' · '+Math.max(0,Math.ceil((c.end-S.dayDone)/7))+' wk left';
+  h+='<div class=card><div class=r><b>'+c.client+'</b></div><div class=sm>'+s+'</div></div>'});return h}
+function escChat(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function managerAnswer(q){
+ const x=q.toLowerCase(),cash=S.cash,feed=S.inv.feed,use=weekUse(),available=Object.keys(P).map(k=>({k,qty:Math.max(0,S.inv[k]-resv(k))})).filter(a=>a.qty>1);
+ const stock=available.map(a=>P[a.k].n+': '+fmt(a.qty)+' '+P[a.k].u+' (ref '+BDT(S.pr[a.k])+'/'+P[a.k].u+')').join('; ');
+ const openOffers=S.offers.length,contracts=S.contracts.filter(c=>!c.done).length;
+ if(/hello|hi\b|morning|who are you|introduc/.test(x)) return 'Good day. I am Mr. Karim, your farm manager. I can advise using the current cash, feed stock, inventory, contracts and offers. Ask me “what should I do?”, “how is cash?”, “feed status”, “what can I sell?” or “should I accept an offer?”.';
+ if(/cash|money|financial|afford|budget|profit|bankrupt|working capital/.test(x)) return 'Current cash: '+BDT(cash)+'. Loan: '+BDT(S.loan)+'. Estimated net worth: '+BDT(nw())+'. Weekly fixed operating costs are about '+BDT(weeklyFixed())+' before feed, seed and other variable costs. '+(cash<0?'Urgent: cash is negative. Pause expansion, avoid new commitments, review Finance and sell unreserved stock.':cash<500000?'Cash is tight. Keep at least a working-capital buffer, delay construction and prioritize reliable sales or profitable contracts.':'Cash position is currently positive. Protect a reserve for wages, utilities, feed and seed before investing in expansion.');
+ if(/when.*(ready|harvest)|harvest.*(date|ready|when)|ready.*(vegetable|veg|fish)|vegetable.*ready|fish.*ready|crop.*ready/.test(x)){const report=[];for(const [key,label] of [['crop','Vegetables'],['fish','Fish']]){const hi=harvestInfo(key);if(hi.first!==null)report.push(label+': next harvest expected '+gameDayDate(S.dayDone+hi.first)+' ('+hi.first+' day(s) away).');else report.push(label+': no active growing unit; check Operations and restock.')}return report.join(' ')+' Check each unit in Operations and compare the date with the offer deadline, quantity, and delivery time before accepting.';}
+ if(/feed|fodder|fish food|fish feed|poultry food|shortage|stock of feed/.test(x)) return 'Feed stock: '+fmt(feed)+' kg. Current estimated weekly use: '+fmt(use)+' kg, about '+(use?Math.floor(feed/use):'many')+' week(s) of cover. '+(feed<use?'Warning: stock is below one week of estimated demand. Buy feed or reduce expansion/stock exposure now.':feed<use*2?'Caution: less than two weeks of feed cover. Plan a purchase before stock runs low.':'Feed cover looks adequate for now. Check this again after adding livestock or ponds.');
+ if(/sell|market|inventory|stock|harvest|milk|egg|fish|vegetable|vegetables/.test(x)) return available.length?'Available unreserved stock: '+stock+'. Spot sales do not happen automatically: open Market, set price and quantity, then approve the sale. Keep an eye on milk and other perishable stock.':'There is no meaningful unreserved product stock available to sell right now. Check harvest progress in Operations and keep enough cash for inputs.';
+ if(/offer|contract|accept|client|customer|order/.test(x)) return 'You have '+openOffers+' open offer(s) and '+contracts+' active contract(s). Before accepting, check the required quantity/capacity, delivery deadline, available stock and likely operating costs. '+(openOffers?'Open the Offers tab and accept only an offer you can fulfil without exhausting working capital.':'No open offers at the moment; wait for a suitable request rather than committing to costs you cannot cover.');
+ if(/what should|advice|recommend|next step|opportunit|what do i do|plan/.test(x)) return (cash<500000?'Priority 1: protect cash. Stop expansion, check Finance and sell unreserved inventory. ':'Priority 1: protect enough cash for weekly wages, utilities and feed. ')+(feed<use*2?'Priority 2: arrange feed because current stock covers less than two weeks. ':'Priority 2: keep checking feed and input costs. ')+(available.length?'Priority 3: review Market and approve a sensible sale for available stock. ':'Priority 3: monitor crop/fish cycle progress and avoid promising products before harvest. ')+(openOffers?'Priority 4: assess open offers in the Offers tab; accept only if the numbers and deadlines work.':'Review Finance each week before building anything new.');
+ if(/build|expand|buy|investment|invest/.test(x)) return 'Before building, check cash after the purchase and the extra weekly running costs. Current cash is '+BDT(cash)+' and estimated weekly fixed costs are '+BDT(weeklyFixed())+'. '+(cash<1000000?'I recommend delaying new construction until cash improves.':'Expansion may be possible, but retain enough cash for several weeks of wages, utilities, feed and seed.');
+ return 'I am using the current game figures to guide you. Try asking: “What should I do next?”, “How is my cash?”, “How much feed do I have?”, “What can I sell?”, or “Should I accept an offer?” I will base the advice on your current farm state.';
+}
+function sendManagerChat(){const el=$('mgrInput');if(!el)return;const q=el.value.trim();if(!q)return;S.chat.push({who:'you',text:q,t:S.t});S.chat.push({who:'manager',text:managerAnswer(q),t:S.t});if(S.chat.length>60)S.chat=S.chat.slice(-60);save();ui();const box=$('mgrChat');if(box)box.scrollTop=box.scrollHeight;const inp=$('mgrInput');if(inp){inp.focus();inp.value='';} }
+function mgr(){let h=aiControlCard()+'<div class=card><b>Farm & Operations manager reports</b><div class=sm>'+CFG.manager+' automatically reports on cash, feed, harvest timing, contracts and cost control. The operations manager reviews overhead and saves 10% of base admin/utility cost in this simulation. Reports appear here and in notifications. Use the <b>Chat</b> tab (or the 💬 button) to ask him, Finance, Law and the rest of the team questions.</div><div class=r><span>Accumulated simulated overhead savings</span><b class=pos>'+BDT(S.legal&&S.legal.operatingSavings||0)+'</b></div></div><div class=card><b>🛒 Supermarket manager</b><div class=sm>The supermarket is outside the farm boundary and sells to customers independently. You can inspect its inventory and sales below. The manager sends stock-purchase requests separately; no purchase is made until you approve.</div><h4>Supermarket inventory — manager report</h4><table><tr><th>Item</th><th>Stock</th><th>Daily shelf price</th><th>Set price</th></tr>'+Object.keys(SHOPITEMS).map(k=>{const it=SHOPITEMS[k];return '<tr><td>'+it.n+'</td><td>'+fmt(S.shopData.stock[k]||0)+' '+it.u+'</td><td>'+BDT(S.shopData.prices[k]||it.base)+'/'+it.u+'</td><td><input id=shopprice_'+k+' type=number min='+(it.cost*1.08)+' value='+(S.shopData.prices[k]||it.base)+' style=width:70px><button onclick="setShopPrice(\''+k+'\',document.getElementById(\'shopprice_'+k+'\').value)">Set</button></td></tr>'}).join('')+'</table><div class=sm>Customers today: <b>'+fmt(S.shopData.customersToday||0)+'</b> · total served: '+fmt(S.shopData.customersTotal||0)+' · Customer sales to date: '+BDT(S.shopData.totalSales||0)+' · simulated gross margin: '+BDT(S.shopData.totalProfit||0)+'. Prices fluctuate weekly; your manual price must cover the manager&#39;s simulated unit cost.</div><h4>Manager purchase requests</h4>'+((S.shopData.requests||[]).filter(r=>r.open).map(r=>'<div class=card offer><b>Restock '+SHOPITEMS[r.item].n+'</b><div class=sm>'+fmt(r.qty)+' '+SHOPITEMS[r.item].u+' · supplier cost '+BDT(r.amount)+' · requested by supermarket manager</div><button class=pri onclick="decideShopRequest('+r.id+',true)">Approve purchase</button> <button onclick="decideShopRequest('+r.id+',false)">Decline</button></div>').join('')||'<div class=sm>No supermarket purchase requests are waiting.</div>')+'</div><h4>Guest booking requests — your approval required</h4>'+((S.tourism.requests||[]).filter(r=>r.open).map(r=>'<div class=card offer><b>'+r.guest+'</b><div class=sm>'+r.guests+' guest(s) · '+r.days+' day(s) · total stay income '+BDT(r.amount)+' at ৳11,000 per day. Maximum capacity is 5 guests.</div><button class=pri onclick="decideTourRequest('+r.id+',true)">Approve stay</button> <button onclick="decideTourRequest('+r.id+',false)">Decline</button></div>').join('')||'<div class=sm>No guest booking requests waiting.</div>')+'<div class=sm>Current stay: '+(S.tourism.booking?S.tourism.booking.guest+' · '+S.tourism.booking.guests+' guest(s) · '+S.tourism.booking.daysLeft+' day(s) remaining':'No guests checked in')+'</div>'+externalMgrHtml()+'<h4>Hospitality finance snapshot</h4><div class=card><div class=sm>Built hospitality facilities: '+Object.keys((S.hospitality&&S.hospitality.built)||{}).filter(k=>S.hospitality.built[k]).length+' / '+Object.keys(HOSP).length+' · accommodation units: '+hospitalityRooms()+' · lifetime hospitality income: '+BDT(S.hospitality&&S.hospitality.income||0)+' · service issues: '+fmt(S.hospitality&&S.hospitality.complaints||0)+'. Hospitality running costs are reduced by 99% versus the previous settings. Each accommodation category has at least 5 units; room and service prices are increased by 10%. Marketing boosts café/activity demand and new booking requests. All facility operating expenses are recorded in the existing Finance ledger.</div></div><h4>Recent supermarket sales</h4>'+((S.shopData.sales||[]).slice(0,8).map(x=>'<div class=msg><b>'+(x.item.startsWith('ext_')?EXTERNAL[x.item.slice(4)].n:SHOPITEMS[x.item].n)+'</b> — '+fmt(x.qty)+' sold at '+BDT(x.price)+' each; sales '+BDT(x.revenue)+', margin/commission '+BDT(x.profit)+'.</div>').join('')||'<div class=sm>No supermarket sales recorded yet.</div>')+'<div class=card><b>🩺 Farm doctor</b><div class=sm>Routine animal-health checks can prevent simulated disease/heat losses. Prevented incidents so far: <b>'+(S.legal&&S.legal.healthIncidentsPrevented||0)+'</b>.</div></div><div class=card><b>⚖️ Lawyer & VAT/Compliance officer</b><div class=sm>The lawyer records simulated lawful deductions; the VAT officer applies eligible simulated input-tax credits. These reduce estimates transparently, never hide liabilities. All actual tax/VAT payments still require your approval. The entire staff team shares one combined pool of 2% of monthly gross income — not 2% per person.</div><div class=r><span>Accrued estimated VAT</span><b>'+BDT(S.legal&&S.legal.vatAccrued||0)+'</b></div><div class=r><span>VAT credits applied</span><b class=pos>'+BDT(S.legal&&S.legal.vatSavings||0)+'</b></div><div class=r><span>Accrued estimated tax</span><b>'+BDT(S.legal&&S.legal.taxAccrued||0)+'</b></div><div class=r><span>Lawful tax deductions recorded</span><b class=pos>'+BDT(S.legal&&S.legal.taxSavings||0)+'</b></div></div><h4>Awaiting your approval</h4>';const aa=(S.approvals||[]).filter(a=>a.open);if(!aa.length)h+='<div class=sm>No pending approvals. The legal team will notify you when a payment or filing needs a decision.</div>';aa.forEach(a=>{h+='<div class=card offer><b>'+a.title+'</b><div class=sm>'+a.details+'</div><div class=r><span>Requested amount</span><b>'+BDT(a.amount)+'</b></div><button class=pri onclick=approveRequest('+a.id+')>Approve payment</button> <button onclick=declineRequest('+a.id+')>Hold for review</button></div>'});if(S.tourism&&S.tourism.reviews&&S.tourism.reviews.length){h+='<h4>Tourist reviews</h4>';S.tourism.reviews.slice(0,6).forEach(r=>h+='<div class=msg good><b>'+r.author+' · '+('★'.repeat(r.stars))+'</b><br>'+r.text+'</div>')}return h+S.notes.map(n=>'<div class="msg '+n.ty+'"><span class=sm>'+stamp(n.t)+'</span><br>'+(n.title?'<b>'+n.title+'</b> — ':'')+n.text+'</div>').join('')}
+/* ===================== TEAM CHAT ===================== */
+const TEAM={manager:{s:'Manager',r:'Farm & Operations Manager',i:'👨‍💼',c:'#4f9bd6',hint:'cash, feed, stock, offers and what to do next'},
+ finance:{n:'Ms. Farzana',s:'Finance',r:'Finance Officer',i:'📊',c:'#4fb386',hint:'cash, loans, tax estimate and what you can afford'},
+ law:{n:'Adv. Hossain',s:'Law',r:'Lawyer',i:'⚖️',c:'#9a86e0',hint:'approvals, licences, contracts and tax rules'},
+ shop:{n:'Mr. Sabbir',s:'Shop',r:'Supermarket Manager',i:'🛒',c:'#df5f4e',hint:'shop stock, prices, customers and restocking'},
+ vat:{n:'Mr. Imran',s:'VAT',r:'VAT & Compliance Officer',i:'🧾',c:'#dfa63a',hint:'VAT owed, credits and payment dates'},
+ doctor:{n:'Dr. Nasrin',s:'Doctor',r:'Farm Doctor',i:'🩺',c:'#4fb3c9',hint:'animal health, heat stress and disease'},
+ mkt:{n:'Ms. Tania',s:'Marketing',r:'Marketing',i:'📣',c:'#e07fb0',hint:'reputation, campaigns and guest reviews'},energy:{n:'Mr. Rafiq',s:'Energy',r:'Electricity & Biogas Manager',i:'⚡',c:'#e6b84f',hint:'solar output, village electricity sales, biogas capacity and supply contracts'},accountant:{n:'Ms. Nabila',s:'Accountant',r:'Accountant & Profit Guard',i:'🧮',c:'#80c4a4',hint:'profit meter, cash reserve, costs and profitability'}};
+const CKEYS=['all','manager','finance','law','shop','vat','doctor','mkt','energy','accountant'],TORDER=['manager','finance','law','shop','vat','doctor','mkt','energy','accountant'];
+const tn=k=>k=='manager'?CFG.manager:TEAM[k].n;
+const QUICK={all:['How is the farm doing?','Can I afford to expand?','Any approvals or tax due?','Is the supermarket stock OK?'],manager:['What should I do next?','How is my feed stock?','What can I sell today?'],finance:['How is my cash?','What can I afford to build?','How much tax is coming?'],law:['What approvals are waiting?','Do I have the licences I need?','What happens if I miss an order?'],shop:['How are shop sales?','What stock is low?','How many customers came?'],vat:['How much VAT do we owe?','When is the next payment?'],doctor:['Are the animals healthy?','Any heat or disease risk?'],mkt:['How is our reputation?','How are guest reviews?'],energy:['How much solar power can we sell?','Is my biogas contract safe?'],accountant:['What is my current profit?','Should I invest or save cash?']};
+let chatPend=0;
+function initTeam(){const t=S.team=Object.assign({chats:{},active:'all',unread:{}},S.team||{});t.chats=t.chats||{};t.unread=t.unread||{};if(CKEYS.indexOf(t.active)<0)t.active='all'}
+const chatMsgs=k=>S.team.chats[k]||(S.team.chats[k]=[]);
+const chatUnread=()=>CKEYS.reduce((s,k)=>s+(S.team.unread[k]||0),0);
+function ansFinance(x){const wk=weeklyFixed(),cash=S.cash,rp=S.prev||S.rep;let tr=0;for(const l in rp.r)tr+=rp.r[l];const tc=reportCostsTotal(rp.c);
+ const qTax=Math.max(0,(S.qrev-S.qcost)*CFG.tax),reserve=wk*4;
+ if(/loan|borrow|bank|interest|debt|repay/.test(x))return 'Loan balance: '+BDT(S.loan)+' at '+(CFG.loanRate*100)+'% a year (about '+BDT(S.loan*CFG.loanRate/52)+' interest a week). The bank limit is '+BDT(CFG.loanMax)+', so '+BDT(Math.max(0,CFG.loanMax-S.loan))+' is still available. '+(S.loan>0&&cash>S.loan+reserve?'You hold enough cash to repay it fully and still keep a 4-week reserve, so repaying saves interest.':S.loan>0?'I would repay only what still leaves a reserve of '+BDT(reserve)+' in cash.':cash<reserve?'Cash is below a safe reserve ('+BDT(reserve)+'); a small loan could bridge it, but only if sales or a harvest are coming.':'No debt, which is good. Borrow only for something that pays back faster than 12% a year.');
+ if(/afford|build|expan|invest|buy|construct|new /.test(x)){const ok=Object.keys(E).filter(k=>n_(k)<E[k].max&&cash-E[k].cap>=reserve).map(k=>E[k].n+' ('+BDTshort(E[k].cap)+')');if(!S.tourism.built&&cash-850000>=reserve)ok.push('Guest cottage (৳8.5L)');
+  return 'Cash is '+BDT(cash)+'. I like to keep 4 weeks of fixed costs ('+BDT(reserve)+') untouched. '+(ok.length?'Safely affordable now: '+ok.join(', ')+'.':'Nothing new is safely affordable yet. Sell stock or wait for the next harvest first.')}
+ if(/tax|vat|owe/.test(x))return 'Estimated income tax this quarter: '+BDT(qTax)+' (rate '+(CFG.tax*100)+'% of positive quarterly profit, due every '+CFG.taxEvery+' weeks; next in '+((CFG.taxEvery-S.week%CFG.taxEvery)%CFG.taxEvery)+' week(s)). Accrued tax on the books: '+BDT(S.legal.taxAccrued||0)+'. VAT accrued: '+BDT(S.legal.vatAccrued||0)+'. Please keep that cash aside.';
+ if(/profit|revenue|income|expense|cost|loss|report|week|earn/.test(x))return (S.prev?'Last week':'This week')+': revenue '+BDT(tr)+', costs '+BDT(tc)+', net '+BDT(tr-tc)+'. Fixed costs run about '+BDT(wk)+' a week before feed and seed. Details are in the Finance tab.';
+ if(/runway|survive|last|how long|bankrupt|fail/.test(x))return 'Fixed costs are about '+BDT(wk)+' a week, so cash of '+BDT(cash)+' covers roughly '+(wk?(cash/wk).toFixed(1):'many')+' weeks even with zero sales. The business fails if cash drops below -৳5,00,000.';
+ if(/worth|value|asset|wealth/.test(x))return 'Net worth is about '+BDT(nw())+' (cash, 75% of the cost of what you have built, stock, minus the loan). The ৳10 crore milestone is '+BDT(Math.max(0,1e8-nw()))+' away.';
+ if(/cash|money|balance|budget|spend/.test(x))return 'Cash is '+BDT(cash)+' with a loan of '+BDT(S.loan)+'. Weekly fixed costs are about '+BDT(wk)+', so you have about '+(wk?(cash/wk).toFixed(1):'many')+' weeks of cover. '+(cash<reserve?'That is below my 4-week safety reserve, so please hold off on spending.':'That is above my 4-week safety reserve ('+BDT(reserve)+').');
+ return null}
+function ansLaw(x){
+ if(/evade|avoid tax|hide|not pay|skip tax|cheat|bribe|fake|launder|illegal|under the table/.test(x))return 'I cannot help with hiding income or evading tax, and I would strongly advise against it. What I can do lawfully is record deductions and keep every filing documented. That already lowers your estimates (so far '+BDT(S.legal.taxSavings||0)+' of tax and '+BDT(S.legal.vatSavings||0)+' of VAT).';
+ const open=(S.approvals||[]).filter(a=>a.open);
+ if(/approv|pending|waiting|payment|decision/.test(x))return open.length?open.length+' item(s) need your decision in the Manager tab: '+open.map(a=>a.title+' '+BDT(a.amount)).join('; ')+'. Holding one leaves the obligation unpaid, so please review before month-end.':'Nothing is waiting for your approval right now. I will flag tax, VAT and licence items as soon as they come due.';
+ if(/licen|permit|export|tour|guest|cottage|stay/.test(x))return 'Export licence: '+(S.lic?'active, fish may be exported.':'not bought (needs a cold store; fee '+BDT(CFG.licFee)+').')+' Farm stay: '+(!S.tourism.built?'cottage not built yet.':S.tourism.license?'licensed. Each booking still needs your approval, maximum 5 guests.':'built but unlicensed; request the ৳75,000 licence in Operations before taking guests.');
+ if(/tax|income|deduct|filing|return|nbr/.test(x))return 'Income tax is estimated at '+(CFG.tax*100)+'% of quarterly profit and falls due every '+CFG.taxEvery+' weeks. On the books: '+BDT(S.legal.taxAccrued||0)+' accrued; lawful deductions recorded: '+BDT(S.legal.taxSavings||0)+'. Payments always wait for your approval. (In-game guidance only; for real filings use your own licensed lawyer.)';
+ if(/contract|offer|penalt|breach|miss|late|deliver|client/.test(x))return 'Active contracts: '+S.contracts.length+'; open offers: '+S.offers.length+'. Before you accept anything: a missed produce order costs an 8% penalty, a biogas shortfall costs 25% of the shortfall value, and a storage contract needs free space for its whole term. Accept only what you can deliver by the deadline.';
+ if(/staff|employee|wage|pool|labou?r|bonus/.test(x))return 'About '+heads()+' staff are on payroll at ৳'+fmt(CFG.wage)+' each per week. The monthly bonus is one combined 2% pool of gross income shared by all eligible roles, not 2% per person, and it is paid only after your approval.';
+ return null}
+function ansVat(x){if(!/vat|tax|credit|compliance|payment|invoice|due|filing/.test(x))return null;const toNext=(4-S.week%4)%4;
+ return 'VAT accrued so far: '+BDT(S.legal.vatAccrued||0)+'. Eligible input credits applied to date: '+BDT(S.legal.vatSavings||0)+'. The monthly payment request comes at the end of every 4th week ('+(toNext?'about '+toNext+' week(s) from now':'this week-end')+') and nothing is paid until you approve it.'}
+function ansShop(x){if(!/shop|store|supermarket|mart|stock|price|customer|shelf|sale|sell|brand|commission|restock|people|footfall/.test(x))return null;const d=S.shopData;
+ if(!n_('shop'))return 'RB Fresh Mart is not built yet. Build a supermarket in the Expansion tab and I can report stock, prices and customers.';
+ if(/customer|people|visit|crowd|footfall/.test(x))return 'About '+fmt(d.customersToday||0)+' customers shopped yesterday and '+fmt(d.customersTotal||0)+' have been served in total. Brand reputation is '+Math.round(S.marketing.reputation)+'/100, which helps bring people in.';
+ const low=Object.keys(SHOPITEMS).filter(k=>(d.stock[k]||0)<({egg:300,milk:80,fish:40,veg:80,eggTray:10,bottledMilk:20,bottledWater:30})[k]),open=d.requests.filter(r=>r.open).length+d.externalRequests.filter(r=>r.open).length;
+ return 'Shelf stock: '+Object.keys(SHOPITEMS).map(k=>SHOPITEMS[k].n+' '+fmt(d.stock[k]||0)+' '+SHOPITEMS[k].u).join(', ')+'. '+(low.length?'Running low: '+low.map(k=>SHOPITEMS[k].n.toLowerCase()).join(', ')+'; expect a restock request.':'Stock levels look fine.')+' Sales to date '+BDT(d.totalSales||0)+' (margin '+BDT(d.totalProfit||0)+'), third-party commission '+BDT(d.commission||0)+'. '+(open?open+' request(s) are waiting for you in the Manager tab.':'No requests waiting.')}
+function ansDoctor(x){if(!/health|animal|cow|cattle|dairy|poultry|bird|layer|hen|chicken|doctor|disease|sick|heat|vet|vaccin|fish|pond|welfare|medicine/.test(x))return null;
+ const al=[];if(S.fl&&S.fl.dis)al.push('ALERT: disease warning in the layer sheds this week. Keep water clean, ventilate and isolate sick birds.');if(S.fl&&S.fl.heat)al.push('ALERT: heat stress this week. Give the cows shade, cool water and ventilation.');
+ const live=[];if(n_('dairy'))live.push(n_('dairy')+' cow(s)');if(n_('poul'))live.push(n_('poul')*500+' layers');if(stocked())live.push(stocked()+' stocked pond(s)');
+ return (al.length?al.join(' ')+' ':'No active health alerts. ')+(live.length?'I am watching '+live.join(', ')+'. ':'You have no livestock yet. ')+'My routine checks have headed off '+(S.legal.healthIncidentsPrevented||0)+' simulated loss(es) so far. Good basics: clean water, shade in hot weeks, a vaccination schedule, and quick isolation of any sick animal.'}
+function ansMkt(x){if(!/market|reputation|brand|campaign|advert|review|rating|guest|tour|demand|promotion/.test(x))return null;const m=S.marketing,t=S.tourism,rv=t.reviews||[],avg=rv.length?(rv.reduce((s,r)=>s+r.stars,0)/rv.length).toFixed(1):null;
+ return 'Brand reputation is '+Math.round(m.reputation||20)+'/100 after '+(m.campaigns||0)+' weekly campaign(s); current demand boost +'+Math.round((m.salesBoost||0)*100)+'%. '+(avg?'Guest reviews average '+avg+' stars from '+rv.length+' recent review(s).':'No guest reviews yet'+(t.built?'.':' because the farm stay is not built.'))+' The campaign costs ৳12,000 a week; higher reputation lifts supermarket traffic.'}
+function statusLine(k){switch(k){
+ case'manager':{const use=weekUse();return 'Cash '+BDT(S.cash)+'; feed cover '+(use?(S.inv.feed/use).toFixed(1)+' week(s)':'n/a')+'; '+S.offers.length+' open offer(s), '+S.contracts.length+' active contract(s).'}
+ case'finance':{const wk=weeklyFixed();return 'Net worth '+BDT(nw())+'; fixed costs about '+BDT(wk)+'/week, so cash covers '+(wk?(S.cash/wk).toFixed(1):'many')+' week(s). Loan '+BDT(S.loan)+'.'}
+ case'law':return (S.approvals||[]).filter(a=>a.open).length+' approval(s) waiting; tax accrued '+BDT(S.legal.taxAccrued||0)+'.';
+ case'shop':return n_('shop')?'Customers yesterday '+fmt(S.shopData.customersToday||0)+'; sales to date '+BDT(S.shopData.totalSales||0)+'.':'No supermarket built yet.';
+ case'vat':return 'VAT accrued '+BDT(S.legal.vatAccrued||0)+'; credits applied '+BDT(S.legal.vatSavings||0)+'.';
+ case'doctor':return (S.fl&&(S.fl.dis||S.fl.heat))?'Health alert active this week; ask me for advice.':'No health alerts.';
+ case'mkt':return 'Reputation '+Math.round(S.marketing.reputation||20)+'/100.';case'energy':return 'Solar arrays '+(S.solar&&S.solar.arrays||0)+'; modelled output '+((S.solar&&S.solar.arrays||0)*80)+' kWh/day; biogas contracts '+S.contracts.filter(c=>c.ty==='gas').length+'.';case'accountant':return 'Current-week operating profit '+BDT(currentOperatingProfit())+'; cash '+BDT(S.cash)+'; four-week reserve target '+BDT(weeklyFixed()*4)+'.'}return ''}
+function energyAnswer(q){const z=S.solar||{arrays:0,price:18,capacityPerArray:80,costPerArrayDay:250};const produced=z.arrays*z.capacityPerArray,own=z.arrays*5,comm=S.contracts.filter(c=>c.ty==='power').reduce((a,c)=>a+c.vol,0),gas=S.contracts.filter(c=>c.ty==='gas').reduce((a,c)=>a+c.vol,0);return 'Solar arrays: '+z.arrays+'; modelled output '+produced+' kWh/day; farm use '+own+'; contracted electricity '+comm+' kWh/day; expected free capacity '+Math.max(0,produced-own-comm)+' kWh/day. Village tariff '+BDT(z.price)+'/kWh; running cost '+BDT(z.arrays*z.costPerArrayDay)+'/day. Active biogas contracts promise '+gas+' m³/day. Do not accept a contract if the offer card shows ⚠ HIGH RISK. I do not sign contracts without your approval.'}
+function accountantAnswer(q){const profit=currentOperatingProfit(),reserve=weeklyFixed()*4;return 'Current-week operating profit (loan principal excluded): '+BDT(profit)+'. Cash: '+BDT(S.cash)+'. Four-week fixed-cost reserve target: '+BDT(reserve)+'. '+(profit<0?'Warning: current week is loss-making; pause optional expansion and review costs.':'Current week is positive so far, but check whether income covers feed, wages, energy maintenance, tax/VAT accrual and loan interest.')+' I can warn and recommend; I will not borrow, sign contracts or spend capital without your approval.'}
+function teamAnswer(k,q){const x=q.toLowerCase();let a=null;
+ switch(k){case'energy':a=energyAnswer(q);break;case'accountant':a=accountantAnswer(q);break;case'manager':a=managerAnswer(q);break;case'finance':a=ansFinance(x);break;case'law':a=ansLaw(x);break;case'shop':a=ansShop(x);break;case'vat':a=ansVat(x);break;case'doctor':a=ansDoctor(x);break;case'mkt':a=ansMkt(x);break}
+ return a||'I can help with '+TEAM[k].hint+'. Try a quick question below, or ask in your own words.'}
+function groupReplies(q){const x=q.toLowerCase();
+ if(/^\s*(hi|hello|hey|salam|assalam|good (morning|afternoon|evening))\b/.test(x))return[['manager','Good day! I am '+CFG.manager+'. The whole team is on this channel. Ask anything and the right person will answer.'],['finance','Hello, Ms. Farzana here (finance): cash, loans, tax and what you can afford.'],['law','Adv. Hossain here: approvals, licences and contracts.']];
+ if(/status|report|update|overview|summary|how.*(farm|business|things|doing|are we)|everyone|everybody|all of you|team/.test(x))return TORDER.map(k=>[k,statusLine(k)]);
+ const out=[],fn={finance:ansFinance,law:ansLaw,shop:ansShop,vat:ansVat,doctor:ansDoctor,mkt:ansMkt,energy:energyAnswer,accountant:accountantAnswer};
+ const m=managerAnswer(q);if(!m.startsWith('I am using the current game figures'))out.push(['manager',m]);
+ for(const k of TORDER.slice(1)){const a=fn[k](x);if(a)out.push([k,a])}
+ return out.length?out.slice(0,4):[['manager',m]]}
+function chatBubble(m){if(m.who==='you')return '<div class="cm me">'+escChat(m.text)+'</div>';const T=TEAM[m.who]||TEAM.manager;
+ return '<div class="cm tm" style="border-left:3px solid '+T.c+'"><b style="color:'+T.c+'">'+T.i+' '+escChat(tn(m.who))+' · '+T.r+'</b>'+escChat(m.text)+'</div>'}
+const chatBoxHtml=()=>chatMsgs(S.team.active).map(chatBubble).join('')+(chatPend>0?'<div class=sm>✎ typing…</div>':'');
+function chipsHtml(){const k=S.team.active;return CKEYS.map(c=>'<button class="'+(c===k?'on':'')+'" onclick="chatSwitch(\''+c+'\')">'+(c==='all'?'👥 All team':TEAM[c].i+' '+TEAM[c].s)+(S.team.unread[c]?'<i class=bd>'+S.team.unread[c]+'</i>':'')+'</button>').join('')}
+function scrollChat(){const b=$('chatBox');if(b)b.scrollTop=b.scrollHeight}
+function chatPane(){const k=S.team.active;
+ if(!chatMsgs(k).length)chatMsgs(k).push({who:k==='all'?'manager':k,text:k==='all'?'Team channel: the manager, finance officer, lawyer and the rest of the staff are all here. Ask a question and whoever it concerns will answer.':'Hello, I am '+tn(k)+', your '+TEAM[k].r.toLowerCase()+'. I can help with '+TEAM[k].hint+'.',t:S.t});
+ S.team.unread[k]=0;const T=k==='all'?null:TEAM[k];
+ const head=T?'<span style="font-size:20px">'+T.i+'</span><div><b>'+escChat(tn(k))+'</b><div class=sm style="margin:0">'+T.r+'</div></div>':'<span style="font-size:20px">👥</span><div><b>All team</b><div class=sm style="margin:0">Everyone who has something to add will reply</div></div>';
+ const quick=(QUICK[k]||[]).map(q=>'<button onclick="sendChat('+JSON.stringify(q).replace(/"/g,'&quot;')+')">'+q+'</button>').join('');
+ return '<div id=chatRoot><div class=ct id=chatChips>'+chipsHtml()+'</div><div id=chatHead>'+head+'</div><div id=chatBox>'+chatBoxHtml()+'</div><div id=chatQ>'+quick+'</div><div id=chatRow><input id=chatIn maxlength=300 autocomplete=off placeholder="'+(T?'Ask '+escChat(tn(k))+'…':'Ask the whole team…')+'" onkeydown="if(event.key===\'Enter\')sendChat()"><button class=pri onclick="sendChat()">Send</button></div></div>'}
+function chatRefresh(){const box=$('chatBox');if(!box||tab!==6)return;const k=S.team.active,sig=k+'|'+chatMsgs(k).length+'|'+chatPend;
+ if(box.dataset.sig!==sig){box.innerHTML=chatBoxHtml();box.dataset.sig=sig;box.scrollTop=box.scrollHeight}
+ const ch=$('chatChips');if(ch){const h=chipsHtml();if(ch.dataset.h!==h){ch.innerHTML=h;ch.dataset.h=h}}}
+function chatSwitch(k){S.team.active=k;S.team.unread[k]=0;const p=$('pane');p.innerHTML=chatPane();scrollChat();const i=$('chatIn');if(i)i.focus();ui()}
+function sendChat(txt){const el=$('chatIn'),q=String(txt!==undefined?txt:(el?el.value:'')).trim().slice(0,300);if(!q)return;if(el&&txt===undefined)el.value='';
+ const k=S.team.active,ch=chatMsgs(k);ch.push({who:'you',text:q,t:S.t});
+ const reps=k==='all'?groupReplies(q):[[k,teamAnswer(k,q)]];chatPend+=reps.length;if(ch.length>80)ch.splice(0,ch.length-80);save();chatRefresh();
+ reps.forEach(([m,ans],i)=>setTimeout(()=>{chatPend--;const c=chatMsgs(k);c.push({who:m,text:ans,t:S.t});if(c.length>80)c.splice(0,c.length-80);if(S.team.active!==k||tab!==6)S.team.unread[k]=(S.team.unread[k]||0)+1;save();chatRefresh();ui()},700+i*950+R_()*350))}
+function shopTraffic(){const d=S.shopData;if(!n_('shop')){d.customersToday=0;d._units=0;return}d.customersToday=Math.max(8,Math.round((d._units||0)/3.2+n_('shop')*14*(1+(S.marketing.reputation||20)/200)));d.customersTotal=(d.customersTotal||0)+d.customersToday;d._units=0}
+function togglePanel(){const a=$('app'),hidden=a.classList.toggle('panel-hidden');const b=$('panelBtn');if(b)b.textContent=hidden?'📋 Open panel':'✕ Close panel';if(typeof resize==='function')setTimeout(resize,80)}
+function toggleHUD(){const a=$('app'),hidden=a.classList.toggle('hud-hidden');const b=$('hudBtn');if(b)b.textContent=hidden?'↕ Show HUD':'↕ Minimise HUD';if(typeof resize==='function')setTimeout(resize,80)}
+function ui(){const p=$('pane'),s=p.scrollTop;if(tab==5)S.unread=0;
+ $('tabs').innerHTML=TABS.map((t,i)=>{const b=i==2?S.offers.length:i==5?S.unread:i==6?chatUnread():0;return'<button class="'+(i==tab?'on':'')+'" onclick="tab='+i+';ui()">'+t+(b?'<i class=bd>'+b+'</i>':'')+'</button>'}).join('');
+ if(tab==6){p.style.overflow='hidden';if(!$('chatRoot')){p.innerHTML=chatPane();scrollChat()}else chatRefresh()}else{p.style.overflow='auto';p.innerHTML=inventorySummaryHtml()+(tab===7?villageHtml():[ops,mkt,offersPane,fin,exp,mgr][tab]());p.scrollTop=s}
+ $('log').innerHTML=S.notes.slice(0,2).map(x=>'<div>'+(x.title?'<b>'+x.title+'</b> — ':'')+x.text+'</div>').join('')}
+function hud(){const d=Math.floor(S.t/1440);const date=new Date(Date.UTC(2026,0,5)+Math.floor(S.t/1440)*86400000);const dateText=date.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'});$('hW').textContent='Week '+S.week+' · '+dateText+' · '+DAYN[d%7]+' '+pad(S.t%1440/60)+':'+pad(S.t%60);
+ $('hY').textContent=1+Math.floor((S.week-1)/52);$('hC').textContent=BDT(S.cash);$('hC').className=S.cash<0?'neg':'';$('hL').textContent=BDT(S.loan);$('hN').textContent=BDT(nw())}
+function renderSpeed(){$('spd').innerHTML=TIME.speeds.map((v,i)=>'<button class="'+(i==S.speed?'pri':'')+'" title="'+(v?(v*TIME.base*60).toLocaleString()+' game minutes per real minute':'Paused')+'" onclick="setSpeed('+i+')">'+(v?v+'×':'Pause')+'</button>').join('')}
+function setSpeed(i){if(S.speed)S.prevSpeed=S.speed;S.speed=i;renderSpeed()}
+addEventListener('keydown',e=>{const t=e.target;const typing=t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable);if(e.code==='Space'&&!modal&&!typing){e.preventDefault();setSpeed(S.speed?0:(S.prevSpeed||TIME.def))}});
+function showHelp(){modal=1;const m=$('modal');m.style.display='flex';
+ m.innerHTML='<div class=box><h2>How to play — RB Group</h2><div class=sm>You own a six-acre integrated farm with ৳60,00,000 in cash. Grow it into an agribusiness group and keep the cash positive.</div><ol>'+
+ '<li><b>Your manager</b> ('+CFG.manager+') reports everything in speech bubbles and keeps a full log under the <b>Manager</b> tab. He also brings client requests that need your decision.</li>'+
+ '<li><b>Time runs continuously</b>, with a day/night cycle. At the default 600× speed, one game week takes 10 real minutes; use the speed buttons at the bottom (Space = pause). Production, sales and spoilage happen daily; wages, costs and reports weekly; tax quarterly.</li>'+
+ '<li><b>Operations</b>: build ponds, crop plots, cows, layer sheds, a feed mill, biogas digesters and cold stores. Click a zone on the map to focus it. Keep auto-restock on so ponds and plots keep producing.</li>'+
+ '<li><b>Market</b>: farm products stay in stock until you set a price and approve a sale. The supermarket is outside the farm boundary; its separate inventory, sales and changing shelf prices are shown in Manager. The supermarket manager asks your approval before restocking both farm products and supplier-owned brands; third-party sales earn commission. Marketing campaigns grow demand and brand reputation, and finance staff report margins and cash flow. Trucks and delivery vehicles periodically enter through the farm gate.</li>'+
+ '<li><b>Village</b>: open the Village tab or use the Village lounge / Bottling plant camera buttons. The plant has visible tanks and a filling line; transfer finished bottles to RB Fresh Mart using the owner controls. Collect rent from independent shop tenants, run the café, and produce RB Fresh Milk (20 litres per batch) or RB Pure Water (50 bottles per batch). Bottled products sell only when stock exists; production inputs and weekly plant overhead are charged.</li>'+
+ '<li><b>Offers</b>: clients ask to store goods, buy your produce, or buy your biogas. Accept only what you can deliver: missed orders and gas shortfalls carry penalties.</li>'+
+ '<li><b>Finance</b>: see the weekly income statement, borrow or repay a bank loan, and watch net worth. If cash falls below −৳5,00,000 the business fails.</li>'+
+ '<li><b>Team chat</b>: open the Chat tab (or the 💬 button) to ask your Manager, Finance officer, Lawyer, Supermarket manager, VAT officer, Farm doctor or Marketing a question, or ask <b>All team</b> and everyone who can help will answer. <b>The map</b>: use the buttons at the bottom right to jump to the whole farm, the gate and supermarkets, or the Guest-stay plot beside the car park. Customers, supplier trucks, buyers, the doctor and guests drive in and out as events happen.</li>'+
+ '<li><b>Good opening</b>: let the farm run for a few weeks, then add a feed mill and a cold store, and use the profit for more ponds, cows and sheds.</li></ol>'+
+ '<button class=pri onclick="closeHelp()">Start playing</button></div>'}
+function closeHelp(){modal=0;S.seen=1;$('modal').style.display='none';save()}
+/* ===================== 3D WORLD ===================== */
+const cv=$('cv'),renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.2;
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(45,1,1,1500);
+scene.background=new THREE.Color(0x9cc4e4);scene.fog=new THREE.Fog(0x9cc4e4,560,1300);
+const hemi=new THREE.HemisphereLight(0xdcefff,0x56693a,.62);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xfff2d8,.95);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+Object.assign(sun.shadow.camera,{left:-190,right:190,top:190,bottom:-190,near:10,far:600});scene.add(sun);
+
+const M=c=>new THREE.MeshStandardMaterial({color:c,roughness:.9}),vis={aer:[],cows:[],cm:[],cr:[]},G={},zp=[],trucks=[];G.tour=new THREE.Group();scene.add(G.tour);
+const add=(p,m,x,y,z)=>{m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;p.add(m);return m};
+const bx=(p,w,h,d,c,x,y,z)=>add(p,new THREE.Mesh(new THREE.BoxGeometry(w,h,d),typeof c=='number'?M(c):c),x,y+h/2,z);
+const cy=(p,rt,rb,h,c,x,y,z,s=20)=>add(p,new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,s),M(c)),x,y+h/2,z);
+const gable=(p,w,h,d,c,x,y,z)=>{const s=new THREE.Shape();s.moveTo(-w/2,0);s.lineTo(w/2,0);s.lineTo(0,h);s.closePath();const g=new THREE.ExtrudeGeometry(s,{depth:d,bevelEnabled:false});g.translate(0,0,-d/2);return add(p,new THREE.Mesh(g,M(c)),x,y,z)};
+const wheel=(p,r,w,x,y,z)=>{const m=add(p,new THREE.Mesh(new THREE.CylinderGeometry(r,r,w,14),M(0x1a1a1a)),x,y,z);m.rotation.x=Math.PI/2};
+const clear=g=>{while(g.children.length)g.remove(g.children[0])};
+const ghost=(p,w,d,x,z,c=0xffffff)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,.3,d),new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:.25}));m.position.set(x,.4,z);p.add(m)};
+const WIN=new THREE.MeshStandardMaterial({color:0x7fb7e6,emissive:0x1b3a55,roughness:.2});
+function tex(base,sp,w,h){const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');x.fillStyle=base;x.fillRect(0,0,256,256);
+ for(let i=0;i<2600;i++){x.fillStyle=sp[i%sp.length];x.globalAlpha=.3;x.fillRect(R_()*256,R_()*256,2+R_()*3,2+R_()*3)}
+ const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(w/14,h/14);t.anisotropy=4;return t}
+function signTex(t,bg,fg){const c=document.createElement('canvas');c.width=1024;c.height=224;const g=c.getContext('2d');g.fillStyle=bg;g.fillRect(0,0,1024,224);g.fillStyle=fg||'#fff';let fs=104;g.font='bold '+fs+'px sans-serif';while(g.measureText(t).width>960&&fs>24){fs-=4;g.font='bold '+fs+'px sans-serif'}g.textAlign='center';g.textBaseline='middle';g.fillText(t,512,116);return new THREE.CanvasTexture(c)}
+function sign(p,t,bg,w,h,x,y,z,ry=0,th=0){const tx=signTex(t,bg);for(const f of[0,1]){const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:tx}));m.position.set(x,y,z);m.rotation.y=ry+f*Math.PI;m.translateZ(th/2+.03);p.add(m)}}
+function drawLabel(c,t,s){const g=c.getContext('2d');g.clearRect(0,0,512,128);g.fillStyle='rgba(15,22,32,.78)';g.fillRect(0,0,512,128);g.textAlign='center';g.fillStyle='#fff';let f=46;g.font='bold '+f+'px sans-serif';while(g.measureText(t).width>490&&f>20){f-=2;g.font='bold '+f+'px sans-serif'}g.fillText(t,256,60);f=34;g.font=f+'px sans-serif';while(g.measureText(s).width>490&&f>16){f-=2;g.font=f+'px sans-serif'}g.fillStyle='#9bb8d3';g.fillText(s,256,106)}
+function mkLabel(t,s,x,y,z,parent){const c=document.createElement('canvas');c.width=512;c.height=128;drawLabel(c,t,s);const tx=new THREE.CanvasTexture(c),sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,depthTest:false,transparent:true}));sp.scale.set(24,6,1);sp.position.set(x,y,z);sp.renderOrder=9;sp.userData={c,tx,s};(parent||scene).add(sp);return sp}
+function setLabel(sp,t,s){drawLabel(sp.userData.c,t,s);sp.userData.tx.needsUpdate=true;sp.userData.s=s}
+function label(t,s,x,z){mkLabel(t,s,x,10,z)}
+const car=(p,c,x,z)=>{bx(p,4.2,1.1,1.9,c,x,.3,z);bx(p,2.2,.9,1.7,0xcfe6f5,x-.2,1.3,z)};
+function cow(){const g=new THREE.Group(),col=[0xf1eee6,0x8a5a3a,0x2b2b2b][R_()*3|0],pt=col==0xf1eee6?0x222222:0xf1eee6;
+ bx(g,2.6,1.2,1.1,col,0,.8,0);for(const sx of[-1,1])for(const sz of[-1,1])bx(g,.28,.8,.28,col,sx*.95,0,sz*.38);
+ bx(g,.8,.7,.7,col,1.6,1.1,0);bx(g,.3,.4,.5,0xd9a5a0,2.1,1.1,0);bx(g,.9,1.22,1.12,pt,-.3,.8,0);bx(g,.1,.9,.1,col,-1.35,.9,0);return g}
+function tractor(){const g=new THREE.Group();bx(g,3.6,1.4,1.8,0x2f8f3a,0,.7,0);bx(g,1.6,1.6,1.7,0x9fd3ff,-.6,2,0);bx(g,1.8,.2,1.9,0x226b2b,-.6,3.6,0);
+ wheel(g,.9,.5,-1.1,.9,1.1);wheel(g,.9,.5,-1.1,.9,-1.1);wheel(g,.5,.4,1.3,.5,.9);wheel(g,.5,.4,1.3,.5,-.9);return g}
+/* --- vehicles, shoppers & traffic (shared geometry/materials) --- */
+const _gm={},_mm={},_wg={},CARCOL=[0xb23a3a,0x2a6fb2,0xe0e0e0,0x2a2a2a,0x2f8f3a,0xd9a23a,0x7a4aa8];
+const GBX=(w,h,d)=>{const k=w+'|'+h+'|'+d;return _gm[k]||(_gm[k]=new THREE.BoxGeometry(w,h,d))};
+const MCC=c=>_mm[c]||(_mm[c]=new THREE.MeshStandardMaterial({color:c,roughness:.75}));
+const WGEO=(r,w)=>{const k=r+'|'+w;return _wg[k]||(_wg[k]=new THREE.CylinderGeometry(r,r,w,12).rotateX(Math.PI/2))};
+const pt=(g,w,h,d,c,x,y,z,sh)=>{const m=new THREE.Mesh(GBX(w,h,d),typeof c=='number'?MCC(c):c);m.position.set(x,y+h/2,z);if(sh)m.castShadow=true;g.add(m);return m};
+const whl=(g,r,w,x,z)=>{const m=new THREE.Mesh(WGEO(r,w),MCC(0x1a1a1a));m.position.set(x,r,z);g.add(m)};
+function mkCar(col){const g=new THREE.Group();pt(g,4.2,.9,1.9,col,0,.35,0,1);pt(g,2.2,.8,1.7,0xcfe6f5,-.25,1.2,0,1);pt(g,.15,.35,1.4,0xffe9a0,2.1,.7,0);pt(g,.15,.3,1.4,0xb02020,-2.1,.7,0);for(const x of[-1.35,1.35])for(const z of[-.95,.95])whl(g,.42,.3,x,z);return g}
+function mkTruck(col,cargo){const g=new THREE.Group();pt(g,8,3,2.8,cargo,-1.5,.9,0,1);pt(g,2.4,2.4,2.8,col,3.6,.9,0,1);pt(g,.1,1,2.4,0x7fb7e6,4.85,1.9,0);pt(g,8.05,.25,2.85,0x555a60,-1.5,3.9,0);for(const x of[-4.2,-2.6,3.4])for(const z of[-1.45,1.45])whl(g,.55,.5,x,z);return g}
+function mkVan(col,cross){const g=new THREE.Group();pt(g,5.2,2.1,2.1,col,-.4,.6,0,1);pt(g,1.8,1.5,2.1,col,2.8,.6,0,1);pt(g,.1,.8,1.8,0x7fb7e6,3.72,1.4,0);if(cross)for(const z of[-1.06,1.06]){pt(g,.9,.25,.05,0xd23b2e,-.4,1.675,z);pt(g,.25,.9,.05,0xd23b2e,-.4,1.35,z)}for(const x of[-2,2.2])for(const z of[-1,1])whl(g,.45,.4,x,z);return g}
+function mkTanker(col){const g=new THREE.Group(),t=new THREE.Mesh(new THREE.CylinderGeometry(1.3,1.3,7.4,16).rotateZ(Math.PI/2),MCC(col));t.position.set(-1.6,2.1,0);t.castShadow=true;g.add(t);pt(g,2.2,2.2,2.6,0xe8e8e8,3.3,.9,0,1);pt(g,.1,1,2.2,0x7fb7e6,4.45,1.8,0);pt(g,8,.4,2,0x555a60,-1.6,.7,0);for(const x of[-4.2,-2.6,3.3])for(const z of[-1.4,1.4])whl(g,.55,.5,x,z);return g}
+function mkBus(col){const g=new THREE.Group();pt(g,8,2.5,2.5,col,0,.6,0,1);pt(g,7.4,.9,2.55,0x9ec9e8,0,1.7,0);pt(g,.1,1.1,2.2,0x7fb7e6,4.02,1.5,0);for(const x of[-2.5,2.6])for(const z of[-1.2,1.2])whl(g,.5,.45,x,z);return g}
+function mkPerson(){const g=new THREE.Group(),sh=[0xd23b2e,0x2e7bd2,0xf0b429,0x2fa36b,0x8a54c4,0xeeeeee][R_()*6|0],sk=[0xe0b894,0xc99672,0x9c6b4a][R_()*3|0];pt(g,.38,.8,.26,0x2b3340,0,0,0);pt(g,.5,.7,.3,sh,0,.8,0);pt(g,.26,.28,.26,sk,0,1.52,0);const bag=pt(g,.35,.4,.18,0xf2c94c,.38,.6,0);bag.visible=false;g.userData.bag=bag;g.scale.setScalar(1.45);return g}
+function tagSprite(text){const c=document.createElement('canvas');c.width=640;c.height=96;const x=c.getContext('2d');x.fillStyle='rgba(15,22,32,.88)';x.fillRect(0,0,640,96);x.strokeStyle='#4f9bd6';x.lineWidth=4;x.strokeRect(2,2,636,92);x.fillStyle='#fff';let fs=40;x.font='bold '+fs+'px sans-serif';while(x.measureText(text).width>610&&fs>16){fs-=2;x.font='bold '+fs+'px sans-serif'}x.textAlign='center';x.textBaseline='middle';x.fillText(text,320,50);
+ const tx=new THREE.CanvasTexture(c),m=new THREE.SpriteMaterial({map:tx,depthTest:false,transparent:true}),sp=new THREE.Sprite(m);sp.scale.set(26,3.9,1);sp.position.set(0,6.2,0);sp.renderOrder=10;sp.userData.dispose=()=>{tx.dispose();m.dispose()};return sp}
+
+/* actors: vehicles steer along waypoints, people walk straight; waypoint props: w=dwell s, hide, bag, fn */
+const actors=[],visitQ=[],lotBusy=new Set();let visitors=0,custAcc=0,ambT=2;
+function spawn(g,path,o){o=o||{};g.position.set(path[0].x,0,path[0].z);if(path[1])g.rotation.y=Math.atan2(-(path[1].z-path[0].z),path[1].x-path[0].x);scene.add(g);const a={g,path,i:1,sp:o.sp||10,turn:o.turn||3,w:0,near:0,veh:o.veh!==false,kind:o.kind||'amb',onKill:o.onKill,ph:R_()*6};actors.push(a);return a}
+function killActor(k){const a=actors[k];scene.remove(a.g);a.g.traverse(o=>{if(o.userData&&o.userData.dispose)o.userData.dispose()});if(a.kind==='visit')visitors--;if(a.onKill)a.onKill();actors.splice(k,1)}
+function arrive(a,p){if(p.hide!==undefined)a.g.visible=!p.hide;if(p.bag!==undefined&&a.g.userData.bag)a.g.userData.bag.visible=!!p.bag;if(p.fn)p.fn(a);a.w=p.w||0;a.near=0;if(a.w<=0)a.i++}
+function stepActors(dt,t){for(let k=actors.length-1;k>=0;k--){const a=actors[k],p=a.path[a.i];if(!p){killActor(k);continue}
+ if(a.w>0){a.w-=dt;if(a.w<=0)a.i++;continue}
+ const g=a.g,dx=p.x-g.position.x,dz=p.z-g.position.z,dist=Math.hypot(dx,dz);
+ if(a.veh){const want=Math.atan2(-dz,dx);let df=want-g.rotation.y;df=Math.atan2(Math.sin(df),Math.cos(df));const mt=a.turn*dt;g.rotation.y+=Math.max(-mt,Math.min(mt,df));
+  const fac=Math.max(.3,Math.cos(Math.min(Math.abs(df),1.3))),slow=p.w>0?Math.min(1,dist/8+.25):1,step=a.sp*fac*slow*dt;
+  g.position.x+=Math.cos(g.rotation.y)*step;g.position.z-=Math.sin(g.rotation.y)*step;a.near=dist<6?a.near+dt:0;
+  if(dist<(p.w>0?1.3:2.8)||a.near>3.5)arrive(a,p)}
+ else{const step=a.sp*dt;if(dist<=step||dist<.05){g.position.x=p.x;g.position.z=p.z;arrive(a,p)}else{g.position.x+=dx/dist*step;g.position.z+=dz/dist*step;g.rotation.y=Math.atan2(-dz,dx);g.position.y=Math.abs(Math.sin(t*9+a.ph))*.07}}}}
+
+/* routes: public road (left-hand traffic) → gate → main road → dock bay → back out */
+const eRoad=side=>side<0?[{x:-190,z:LE},{x:NL-6,z:LE},{x:NL,z:WS+4},{x:NL,z:WS-3}]:[{x:190,z:LW},{x:NL+10,z:LW},{x:NL+3,z:WS+8},{x:NL,z:WS+3.5},{x:NL,z:WS-3}];
+const xRoad=side=>side>0?[{x:SL,z:WS-3},{x:SL,z:WS+3.5},{x:SL+4,z:LE},{x:190,z:LE}]:[{x:SL,z:WS-3},{x:SL,z:WS+4.5},{x:SL-4,z:LW},{x:-190,z:LW}];
+function dockPath(key){const d=DOCK[key],s=d.s,z=d.z,bay={x:XR+s*d.bd,z};
+  const turnX=s<0?XR-4:XR+4;
+  return{inn:[{x:NL,z:WS-3},{x:NL,z:z+9},{x:turnX,z:z+4},{x:bay.x,z:bay.z}],bay,
+   out:[{x:turnX,z:z-4},{x:NL,z:z-8},{x:NL,z:WS-3}]}}
+const LOTBAYS=[];ROWZ.forEach((rz,r)=>BAYX.forEach((bxx,k)=>{if(!STAT_BAYS.some(s=>s[0]==r&&s[1]==k))LOTBAYS.push({id:r*10+k,x:bxx,z:rz,r})}));
+function lotPath(){const fr=LOTBAYS.filter(b=>!lotBusy.has(b.id));if(!fr.length)return null;const b=fr[R_()*fr.length|0];lotBusy.add(b.id);
+ return{inn:[{x:NL,z:LOT_AZ+7},{x:XR+4,z:LOT_AZ+1},{x:b.x-5,z:LOT_AZ},{x:b.x,z:LOT_AZ+(b.r?2.8:-2.8)}],bay:{x:b.x,z:b.z},out:[{x:b.x,z:LOT_AZ},{x:XR+5,z:LOT_AZ},{x:SL,z:LOT_AZ+3},{x:SL,z:LOT_AZ+9}],free:()=>lotBusy.delete(b.id)}}
+function shopLeg(side,fix){const ns=Math.max(1,n_('shop')),i=fix!==undefined?fix:(R_()*ns|0),bxx=SHOPX[i]-6+R_()*12,bz=SHOP_FRONT-6.5;
+ if(side<0)return{i,inn:[{x:-190,z:LE},{x:bxx-9,z:LE},{x:bxx-1,z:WS+14},{x:bxx,z:WS+18}],bay:{x:bxx,z:bz},out:[{x:bxx,z:WS+16.5},{x:bxx-4,z:LW},{x:-190,z:LW}]};
+ return{i,inn:[{x:190,z:LW},{x:bxx+9,z:LW},{x:bxx+1,z:WS+14},{x:bxx,z:WS+18}],bay:{x:bxx,z:bz},out:[{x:bxx,z:WS+16.5},{x:bxx+3,z:LE},{x:190,z:LE}]}}
+
+/* purposeful visits: suppliers, buyers, clients, doctor, guests … */
+const ITEMZ={fish:'fishery',veg:'agri',milk:'dairy',egg:'poultry'};
+function queueVisit(o){if(visitQ.length<12)visitQ.push(o)}
+function visitFor(item,who,text){const cold=item=='fish'||item=='milk';queueVisit({veh:'truck',col:cold?0xeef3f6:0xd9a23a,cargo:cold?0xdff1fb:0x6fae4a,to:ITEMZ[item],text:who+' — '+text,dwell:10})}
+function runVisits(){while(visitQ.length&&visitors<6)startVisit(visitQ.shift())}
+function startVisit(o){const side=R_()<.5?-1:1;let g,sp=9;
+ switch(o.veh){case'truck':g=mkTruck(o.col||0xeeeeee,o.cargo||0x3a7ac8);break;case'van':g=mkVan(o.col||0xffffff,o.cross);sp=10;break;case'tanker':g=mkTanker(o.col||0xc9d3d9);break;case'bus':g=mkBus(o.col||0xf0b429);break;default:g=mkCar(o.col||CARCOL[R_()*CARCOL.length|0]);sp=11}
+ let inn,bay,out,onKill;
+ if(o.to==='lot'){const L=lotPath();if(!L)return;inn=L.inn;bay=L.bay;out=L.out;onKill=L.free}
+ else if(o.to==='village'){const cx=118,cz=SHOP_Z0+12;inn=[{x:190,z:LW},{x:170,z:LW},{x:158,z:SHOP_Z0+27},{x:cx+28,z:cz+24}];bay={x:cx+10,z:cz+19,w:o.dwell||10};out=[{x:cx+28,z:cz+24},{x:158,z:SHOP_Z0+27},{x:170,z:LW},{x:190,z:LW}]}
+ else if(o.to==='shop'){const L=shopLeg(side);inn=L.inn;bay=L.bay;out=L.out}
+ else{const d=dockPath(o.to);inn=d.inn;bay=d.bay;out=d.out}
+ const shop=o.to==='shop',path=[...(shop?[]:eRoad(side)),...inn,{x:bay.x,z:bay.z,w:o.dwell||8},...out,...(shop?[]:xRoad(R_()<.5?1:-1))];
+ /* vehicle speech bubbles disabled */
+ visitors++;spawn(g,path,{sp,turn:o.veh==='car'||!o.veh?3.4:2.4,kind:'visit',onKill})}
+function weeklyVisits(){
+ if(S.contracts.some(c=>c.ty=='gas'))queueVisit({veh:'tanker',to:'util',text:'Biogas customer — weekly collection',dwell:10});
+ if((n_('poul')||n_('dairy'))&&R_()<.6)queueVisit({veh:'van',col:0xffffff,cross:1,to:n_('poul')&&(!n_('dairy')||R_()<.5)?'poultry':'dairy',text:'Farm doctor — routine health round',dwell:9});
+ if(S.tourism&&S.tourism.built&&S.tourism.license){queueVisit({veh:'bus',to:'tour',text:'Farm-visit group (day trip)',dwell:12});queueVisit({veh:'car',to:'village',text:'Tourists stopping at the Village Lounge café and shops',dwell:14});}else if(R_()<.65){queueVisit({veh:R_()<.25?'bus':'car',to:'village',text:'Local visitors stopping at the village café and rental shops',dwell:12});}
+ if(n_('mill')&&R_()<.6)queueVisit({veh:'truck',col:0xd9a23a,cargo:0xb98b4a,to:'feed',text:'Feed customer — collecting feed',dwell:9});
+ if(n_('store')&&R_()<.5)queueVisit({veh:'truck',col:0xeeeeee,cargo:0x3a7ac8,to:'store',text:'Storage client — checking goods',dwell:10})}
+
+/* supermarket shoppers: counts follow the shop's real daily sales */
+function spawnShopper(){const ns=n_('shop');if(!ns)return;const i=R_()*ns|0,dx=SHOPX[i]+(R_()-.5)*10,doorZ=SHOP_FRONT+.4;
+ if(R_()<.38&&actors.filter(a=>a.kind==='ccar').length<9){const side=R_()<.5?-1:1,L=shopLeg(side,i),car=mkCar(CARCOL[R_()*CARCOL.length|0]);
+  const bayP={x:L.bay.x,z:L.bay.z,w:19,fn:()=>{const p=mkPerson(),px=L.bay.x+1.8,pz=L.bay.z+.8,drx=SHOPX[i]+(R_()-.5)*8;
+   spawn(p,[{x:px,z:pz},{x:drx,z:doorZ,hide:true,w:3+R_()*4},{x:drx,z:doorZ,hide:false,bag:true},{x:px,z:pz+.4,hide:true}],{sp:2.6,veh:false,kind:'cust'})}};
+  spawn(car,[...L.inn,bayP,...L.out],{sp:10,turn:3.4,kind:'ccar'});return}
+ const west=R_()<.5,sx=west?-140:140,ex=west?140:-140;
+ spawn(mkPerson(),[{x:sx,z:SWZ},{x:dx,z:SWZ},{x:dx,z:doorZ,hide:true,w:3+R_()*4},{x:dx,z:doorZ,hide:false,bag:true},{x:dx,z:SWZ},{x:ex,z:SWZ}],{sp:2.6,veh:false,kind:'cust'})}
+
+let villageWalkTimer=2;
+function spawnVillageVisitor(){if(!S.village||actors.filter(a=>a.kind==='villageguest').length>=12)return;const cx=118,cz=SHOP_Z0+12;const startX=R_()<.5?cx-39:cx+39,startZ=cz+25;const targets=[[cx-12,cz+8],[cx+1,cz+9],[cx+13,cz+8],[cx+7,cz+17],[cx-2,cz+20]];const a=targets[R_()*targets.length|0],b=targets[R_()*targets.length|0];const p=mkPerson();spawn(p,[{x:startX,z:startZ},{x:cx+25,z:cz+23},{x:a[0],z:a[1],w:2+R_()*5},{x:b[0],z:b[1],w:2+R_()*4},{x:startX,z:startZ}],{sp:1.7,veh:false,kind:'villageguest'});}
+function villageFootTraffic(dt){if(!S.speed||S.over||modal)return;const hour=(S.t%1440)/60;if(hour<7||hour>22)return;villageWalkTimer-=dt;if(villageWalkTimer>0)return;const rep=Math.max(0,Math.min(100,Number(S.marketing&&S.marketing.reputation)||20));villageWalkTimer=Math.max(1.2,5.8-rep*.035-R_()*1.8);if(R_()<.92)spawnVillageVisitor();if(R_()<.2)spawnVillageVisitor();}
+
+function spawnCustomers(dm){const ns=n_('shop');if(!ns||!dm)return;const h=(S.t%1440)/60;if(h<7||h>22)return;
+ const perDay=Math.max(20,(S.shopData&&S.shopData.customersToday)||ns*60),w=Math.sin(Math.PI*(h-7)/15);
+ custAcc+=perDay*.35*w*dm/573;let n=Math.floor(custAcc);custAcc-=n;n=Math.min(n,3);
+ for(let i=0;i<n;i++)if(actors.filter(a=>a.kind==='cust').length<34)spawnShopper()}
+function ambientTraffic(dt){ambT-=dt;if(ambT>0)return;ambT=3+R_()*4;if(actors.filter(a=>a.kind==='amb').length>=8)return;
+ const east=R_()<.5,r=R_(),sp=10+R_()*5;let g;
+ if(r<.3)g=mkTruck([0xffffff,0xd9a23a,0x3a7ac8][R_()*3|0],[0x3a7ac8,0xcfd3d6,0x6fae4a][R_()*3|0]);else if(r<.38)g=mkBus(0xe0a21b);else g=mkCar(CARCOL[R_()*CARCOL.length|0]);
+ spawn(g,east?[{x:-190,z:LE},{x:190,z:LE}]:[{x:190,z:LW},{x:-190,z:LW}],{sp,kind:'amb',turn:4})}
+
+/* --- ground, roads, wall, gate --- */
+{const gr=new THREE.Mesh(new THREE.PlaneGeometry(1400,1400),new THREE.MeshStandardMaterial({map:tex('#5f8a3e',['#4d7a31','#74a04a','#6a9444'],1400,1400),roughness:1}));gr.rotation.x=-Math.PI/2;gr.receiveShadow=true;scene.add(gr)}
+const ZG={fishery:['#6f9a4a',['#5a8238','#86ad5c']],agri:['#8a7550',['#7a6540','#9a8560']],dairy:['#78a04e',['#5f8a3e','#8ab35e']],poultry:['#a89a78',['#98896a','#b8aa88']],feed:['#a8a8a0',['#98988f','#b8b8b0']],util:['#9a978c',['#8a877c','#aaa79c']],admin:['#7fae55',['#6a9a45','#90be66']],store:['#b0b0a8',['#a0a098','#c0c0b8']]};
+for(const k in Z){const r=Z[k],m=new THREE.Mesh(new THREE.PlaneGeometry(r.w,r.h),new THREE.MeshStandardMaterial({map:tex(ZG[k][0],ZG[k][1],r.w,r.h),roughness:1}));
+ m.rotation.x=-Math.PI/2;m.position.set(r.cx,.02,r.cz);m.receiveShadow=true;m.userData.z=k;scene.add(m);zp.push(m);G[k]=new THREE.Group();scene.add(G[k]);label(ZN[k],CFG.acres[k].toFixed(2)+' acres',r.cx,r.cz)}
+{const m=new THREE.Mesh(new THREE.PlaneGeometry(TOURP.w,TOURP.h),new THREE.MeshBasicMaterial({visible:false}));m.rotation.x=-Math.PI/2;m.position.set(TOURP.cx,.04,TOURP.cz);m.userData.z='tour';scene.add(m);zp.push(m)}
+G.shop=new THREE.Group();scene.add(G.shop);G.village=new THREE.Group();scene.add(G.village);
+const flat=(w,d,x,z,c,y=.06)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),M(c));m.rotation.x=-Math.PI/2;m.position.set(x,y,z);m.receiveShadow=true;scene.add(m);return m};
+function palm(g,x,z,h){h=h||(6.5+R_()*2.5);cy(g,.25,.4,h,0x8a6d4a,x,0,z,6);for(let j=0;j<8;j++){const a=j/8*Math.PI*2,l=new THREE.Mesh(GBX(3.8,.08,.8),MCC(0x2f7d32));l.position.set(x+Math.cos(a)*1.6,h-.1,z+Math.sin(a)*1.6);l.rotation.set(0,-a,-.5);l.castShadow=true;g.add(l)}cy(g,.4,.4,.5,0x6b4f33,x,h-.4,z,6)}
+function tree(g,x,z,s){s=s||(1+R_()*.6);cy(g,.3*s,.45*s,3*s,0x5a3d22,x,0,z,6);const m=add(g,new THREE.Mesh(new THREE.SphereGeometry(1,8,6),M([0x3f7a2f,0x4a8a34,0x356b2a][R_()*3|0])),x,4.3*s,z);m.scale.set(2*s,1.7*s,2*s)}
+function umbrella(g,x,z,c){cy(g,.06,.06,2.4,0xcccccc,x,0,z,6);add(g,new THREE.Mesh(new THREE.ConeGeometry(1.9,.7,10),M(c)),x,2.75,z);cy(g,.7,.7,.08,0xf1efe6,x,.75,z,12)}
+function tower(x,z){const g=new THREE.Group();cy(g,3.1,3.4,6.4,0xb7a583,0,0,0,14);cy(g,3.8,3.8,.7,0x8f7d5c,0,6.4,0,14);cy(g,2.7,2.7,2.2,0xd6c8a6,0,7.1,0,14);
+ for(let i=0;i<4;i++){const a=i*Math.PI/2;bx(g,1,1,.2,WIN,Math.cos(a)*2.72,7.6,Math.sin(a)*2.72).rotation.y=Math.PI/2-a}
+ add(g,new THREE.Mesh(new THREE.ConeGeometry(4.2,3.2,14),M(0xc4452d)),0,10.9,0);g.position.set(x,0,z);scene.add(g)}
+
+// public road, pavement, shop car-parks
+flat(560,10,0,RD_Z,0x3d4042);flat(560,.35,0,RD_Z-4.7,0xe8d99c,.07);flat(560,.35,0,RD_Z+4.7,0xe8d99c,.07);
+for(let i=0;i<28;i++)bx(scene,5,.03,.35,0xf3f3f3,-270+i*20,.07,RD_Z);
+flat(560,2.4,0,SWZ,0xb9b9b3,.07);
+SHOPX.forEach(x=>{flat(42,SHOP_FRONT-WS-15.2,x,(SHOP_FRONT+WS+15.2)/2,0x484c50,.065);for(let k=0;k<6;k++)bx(scene,.18,.03,4.6,0xf0f0f0,x-15+k*6,.08,SHOP_FRONT-6.5)});
+// driveway, main internal road, dirt roads between the fields
+flat(8,5.4,XR,WS+2.7,0x3d4042,.07);flat(6,WS-ZAB,XR,(WS+ZAB)/2,0x3d4042,.075);
+for(let z=ZAB+6;z<WS-4;z+=10)bx(scene,.28,.03,4,0xf3f3f3,XR,.09,z);
+flat(4,ZAB-WN-8,XR,(ZAB+WN+8)/2,0xa28b62,.06);flat(FW-8,4,0,ZAB,0xa28b62,.065);
+for(const k in DOCK){if(k=='agri')continue;const d=DOCK[k];flat(11,6.4,XR+d.s*(d.bd-.5),d.z,0xb8b0a0,.068)}
+// gate-plaza car park + lawns, palms, café, grove
+flat(LOTX1-LOTX0,LOTZ1-LOTZ0,(LOTX0+LOTX1)/2,LOT_AZ,0x484c50,.07);
+ROWZ.forEach(rz=>{for(let k=0;k<=BAYX.length;k++)bx(scene,.18,.03,5.4,0xf0f0f0,BAYX[0]-3.75+k*7.5,.09,rz)});
+STAT_BAYS.forEach(([r,k])=>{const c=mkCar(CARCOL[(r*7+k)%CARCOL.length]);c.position.set(BAYX[k],0,ROWZ[r]);c.rotation.y=r?-Math.PI/2:Math.PI/2;scene.add(c)});
+flat(47,30,-51.5,(ZBOT+WS)/2,0x7fae55,.03);flat(34,30,57,(ZBOT+WS)/2,0x6a9a45,.03);
+for(let i=0;i<6;i++)palm(scene,-72.5,ZBOT+4+i*5,7+R_()*2);
+[[XR-7,ZBOT+4],[XR-8,WS-3.5],[-40,WS-3],[-62,WS-3.5]].forEach(([x,z])=>palm(scene,x,z));
+for(let i=0;i<14;i++)tree(scene,43+R_()*28,ZBOT+4+R_()*22);
+[[-41,72.5,0xd23b2e],[-41,85.5,0xf0b429],[-44.5,79,0x2e7bd2]].forEach(([x,z,c])=>umbrella(scene,x,z,c));
+// perimeter wall, watch-towers, arched gate
+{const wm=M(0xc2bca9),wl=(w,d,x,z)=>bx(scene,w,2.4,d,wm,x,0,z),gx0=XR-5.6,gx1=XR+5.6;
+ wl(FW,.7,0,WN);wl(.7,FHt,-FW/2,0);wl(.7,FHt,FW/2,0);wl(gx0+FW/2,.7,(-FW/2+gx0)/2,WS);wl(FW/2-gx1,.7,(gx1+FW/2)/2,WS);
+ for(const s of[-1,1]){bx(scene,2,7,2.4,0xb59d78,XR+s*4.6,0,WS);bx(scene,2.6,.6,3,0x8f7a58,XR+s*4.6,7,WS)}
+ bx(scene,11.4,2.6,1.3,0x8b4a2b,XR,6.6,WS);sign(scene,'RB GROUP · MODERN INTEGRATED FARM','#8b4a2b',10.6,2,XR,7.9,WS,0,1.3);
+ bx(scene,4,3,3.4,0xd8c8a8,XR-9.5,0,WS-3);bx(scene,4.6,.4,4,0x8a2b2b,XR-9.5,3,WS-3);
+ [[-FW/2,WN],[FW/2,WN],[-FW/2,WS],[FW/2,WS],[-FW/2,WN+42],[-FW/2,WN+100],[FW/2,WN+42],[FW/2,WN+100],[0,WN],[XR-30,WS],[XR+30,WS]].forEach(([x,z])=>tower(x,z))}
+const trac=tractor();scene.add(trac);
+
+/* --- trees & village --- */
+{const N=240,tr=new THREE.InstancedMesh(new THREE.CylinderGeometry(.35,.5,4,6),M(0x5a3d22),N),cr=new THREE.InstancedMesh(new THREE.SphereGeometry(1,8,6),M(0xffffff),N),o=new THREE.Object3D(),c=new THREE.Color();
+ for(let i=0;i<N;i++){let x,z,g=0;do{x=(R_()-.5)*(FW+300);z=WN-110+R_()*(FHt+190)}while(g++<60&&((Math.abs(x)<FW/2+8&&z>WN-8&&z<WS+8)||(z>WS+2&&z<WS+115&&Math.abs(x)<185)));
+  const s=3+R_()*3.5;o.position.set(x,2,z);o.scale.set(1,1,1);o.updateMatrix();tr.setMatrixAt(i,o.matrix);
+  o.position.set(x,4+s*.5,z);o.scale.set(s,s*.9,s);o.updateMatrix();cr.setMatrixAt(i,o.matrix);cr.setColorAt(i,c.setHSL(.26+R_()*.07,.5,.22+R_()*.1))}
+ tr.castShadow=cr.castShadow=true;scene.add(tr,cr)}
+for(let i=0;i<7;i++){const x=-FW/2-40-R_()*35,z=-60+i*19,p=new THREE.Group();bx(p,8,3.2,6,[0xe3d8c0,0xc9d7c6,0xd9c3b0][i%3],0,0,0);gable(p,7,2,8.4,0x8d8d8d,0,3.2,0).rotation.y=Math.PI/2;p.position.set(x,0,z);scene.add(p)}
+
+/* --- selection frame --- */
+const hl=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1,4,1)),new THREE.LineBasicMaterial({color:0xffd24a}));hl.visible=false;scene.add(hl);
+
+/* --- water --- */
+const waterTex=(()=>{const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');g.fillStyle='#2d7f9c';g.fillRect(0,0,128,128);
+ for(let i=0;i<260;i++){g.strokeStyle=i%2?'#5fb2cc':'#1f6a86';g.globalAlpha=.35;g.beginPath();const x=R_()*128,y=R_()*128;g.moveTo(x,y);g.lineTo(x+8+R_()*10,y+R_()*3);g.stroke()}
+ const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(4,6);return t})();
+const WATER=new THREE.MeshStandardMaterial({map:waterTex,transparent:true,opacity:.9,roughness:.15,metalness:.2});
+
+/* --- zone builders (rebuilt when you buy something) --- */
+function bFish(){const g=G.fishery,r=Z.fishery,cw=r.w/2,ch=r.h/2;clear(g);vis.aer=[];
+ for(let i=0;i<4;i++){const px=r.x+cw*(i%2)+cw/2,pz=r.z+ch*(i>>1)+ch/2,own=i<n_('fish'),pw=cw-8,pd=ch-8,dk=0x7b5a3a;
+  bx(g,pw+2.2,1,2.2,dk,px,0,pz-pd/2);bx(g,pw+2.2,1,2.2,dk,px,0,pz+pd/2);bx(g,2.2,1,pd,dk,px-pw/2,0,pz);bx(g,2.2,1,pd,dk,px+pw/2,0,pz);
+  const w=new THREE.Mesh(new THREE.PlaneGeometry(pw,pd),own?WATER:M(0x5a4630));w.rotation.x=-Math.PI/2;w.position.set(px,own?.6:.25,pz);g.add(w);
+  if(own)for(const dz of[-.22,.22]){const a=new THREE.Group();a.position.set(px+dz*pw,.9,pz);bx(a,.5,.5,.5,0x555555,0,-.2,0);
+   for(let j=0;j<6;j++){const an=j*Math.PI/3,b=bx(a,2.4,.12,.55,0xe6e6e6,0,0,0);b.position.set(0,Math.sin(an)*.9,Math.cos(an)*.9);b.rotation.x=an}
+   g.add(a);vis.aer.push(a)}}
+ bx(g,3.6,2.6,3.6,0xd8cdb0,r.cx,0,r.cz);gable(g,4.6,1.2,4.2,0xc4452d,r.cx,2.6,r.cz).rotation.y=Math.PI/2}
+function bAgri(){const g=G.agri,r=Z.agri,cw=r.w/3,ch=r.h/2;clear(g);vis.cm=[];vis.cr=[];
+ for(let i=0;i<6;i++){const px=r.x+cw*(i%3)+cw/2,pz=r.z+ch*Math.floor(i/3)+ch/2,own=i<n_('crop');
+  bx(g,cw-6,.25,ch-3,own?0x5b3d26:0x7a6a50,px,0,pz);
+  if(own){const rows=new THREE.Group(),mt=M(0x3f8f2f),nr=7,sp=(ch-7)/nr;rows.position.set(px,.25,pz);for(let j=0;j<nr;j++)bx(rows,cw-10,1,1,mt,0,0,(j-(nr-1)/2)*sp);g.add(rows);vis.cm[i]=mt;vis.cr[i]=rows}
+  else ghost(g,cw-8,ch-5,px,pz,0xd9c9a0)}}
+function bDairy(){const g=G.dairy,r=Z.dairy,bw=40,bd=14,bx0=r.x+4+bw/2,bz0=r.z+bd/2+3;clear(g);vis.cows=[];
+ bx(g,bw,.4,bd,0x9a9a92,bx0,0,bz0);for(const sx of[-1,1])for(const sz of[-1,1])bx(g,.6,4.5,.6,0x6b4f33,bx0+sx*(bw/2-.5),0,bz0+sz*(bd/2-.5));
+ gable(g,bd+2,3,bw+2,0xc4452d,bx0,4.5,bz0).rotation.y=Math.PI/2;cy(g,1.5,1.5,3,0xdddddd,bx0+bw/2-3,0,bz0+bd/2+2.5);
+ const fx0=r.x+3,fx1=r.x+r.w-9,fz0=r.z+bd+7,fz1=r.z+r.h-2,fcx=(fx0+fx1)/2;
+ bx(g,fx1-fx0,.15,.15,0x8a6a45,fcx,1.1,fz0);bx(g,fx1-fx0,.15,.15,0x8a6a45,fcx,1.1,fz1);bx(g,.15,.15,fz1-fz0,0x8a6a45,fx0,1.1,(fz0+fz1)/2);bx(g,.15,.15,fz1-fz0,0x8a6a45,fx1,1.1,(fz0+fz1)/2);
+ for(const x of[fx0,fx1])for(const z of[fz0,fz1])bx(g,.3,1.5,.3,0x6b4f33,x,0,z);
+ for(let i=0;i<n_('dairy');i++){const c=cow();c.position.set(r.x+8+(i%5)*6.4,0,fz0+4+Math.floor(i/5)*4.5);c.userData.bx=c.position.x;g.add(c);vis.cows.push(c)}}
+function bPoul(){const g=G.poultry,r=Z.poultry,sl=r.h/6,cx0=r.x+22.5;clear(g);
+ for(let i=0;i<6;i++){const z=r.z+sl*i+sl/2;
+  if(i<n_('poul')){bx(g,40,.4,5.6,0x9a9a92,cx0,0,z);bx(g,40,2.4,5,0xe8e2cf,cx0,.4,z);bx(g,40.1,1.1,5.1,new THREE.MeshStandardMaterial({color:0x9ec9e0,transparent:true,opacity:.75}),cx0,.9,z);
+   gable(g,6.6,1.9,42,0xc4452d,cx0,2.8,z).rotation.y=Math.PI/2;for(let f=0;f<3;f++)bx(g,.3,1.2,1.2,0x333333,cx0+20.1,.9,z+(f-1)*1.4);
+   cy(g,.7,.7,3.4,0xcfcfcf,cx0-21.4,0,z)}
+  else ghost(g,40,5,cx0,z,0xffffff)}}
+function bFeed(){const g=G.feed,r=Z.feed,n=n_('mill'),mx=r.x+17;clear(g);if(!n){ghost(g,26,8,mx,r.cz,0xffd27a);return}
+ bx(g,26,6,8,0xc9c3b0,mx,0,r.cz);gable(g,9.4,2.4,27,0xc4452d,mx,6,r.cz).rotation.y=Math.PI/2;
+ for(let i=0;i<n+1;i++){const sx=r.x+36+i*7;cy(g,2.5,2.5,11,0xcfd4d8,sx,0,r.cz);cy(g,0,2.5,2,0xb5bbc0,sx,11,r.cz)}
+ cy(g,0,3,3,0xd8b560,r.x+70,0,r.cz);for(let i=0;i<4;i++)bx(g,1.6,.8,1,0xe6dcc0,r.x+76+i*2,0,r.cz+2)}
+function bUtil(){const g=G.util,r=Z.util,n=n_('bio'),tx=r.x+6,tz=r.cz;clear(g);
+ for(const sx of[-1,1])for(const sz of[-1,1])bx(g,.35,9,.35,0x8e9aa5,tx+sx*1.7,0,tz+sz*1.7);
+ bx(g,4,.25,.25,0x8e9aa5,tx,3,tz+1.7);bx(g,4,.25,.25,0x8e9aa5,tx,3,tz-1.7);cy(g,3.1,3.1,4.6,0xdfe6ea,tx,9,tz,24);cy(g,0,3.1,1.3,0x9aa6ae,tx,13.6,tz,24);
+ for(let row=0;row<2;row++)for(let i=0;i<Math.min(8,(S.solar&&S.solar.arrays||0));i++){const p=bx(g,4,.15,2.2,0x1f3a73,r.x+14+i*4.4,0,r.z+2.6+row*3.4);p.position.y=1.3;p.rotation.x=-.5;bx(g,.2,1.2,.2,0x777777,r.x+14+i*4.4,0,r.z+3.1+row*3.4)}
+ for(let i=0;i<3;i++){const x=r.x+17+i*10,z=r.z+12.2;
+  if(i<n){cy(g,3.8,3.8,2,0x8d9a86,x,0,z,28);add(g,new THREE.Mesh(new THREE.SphereGeometry(3.8,28,14,0,Math.PI*2,0,Math.PI/2),M(0x3f6b3a)),x,2,z)}
+  else ghost(g,7.6,7.6,x,z,0x9fe39f)}
+ bx(g,3.4,2.6,3,0xb7b7b0,r.x+11.5,0,r.z+12)}
+function bAdmin(){const g=G.admin,r=Z.admin,ox=r.x+13.5,oz=r.cz;clear(g);
+ bx(g,24,7,8,0xe9e4d6,ox,0,oz);gable(g,10,3,25,0xc4452d,ox,7,oz).rotation.y=Math.PI/2;
+ for(let i=0;i<7;i++)for(const y of[1.2,4.2])bx(g,2,1.6,.12,WIN,ox-9+i*3,y,oz+4.05);
+ sign(g,'RB GROUP · HEAD OFFICE','#1f3a5a',12,1.4,ox,5.7,oz+4.3);
+ cy(g,.12,.12,9,0xcccccc,ox+14,0,oz-3);bx(g,2.6,1.6,.06,0x006a4e,ox+15.4,7,oz-3);
+ const d=new THREE.Mesh(new THREE.CircleGeometry(.5,16),new THREE.MeshBasicMaterial({color:0xf42a41}));d.position.set(ox+15.2,7.8,oz-2.95);g.add(d);
+ car(g,0xb23a3a,ox+16,oz+5);car(g,0x3a5ab2,ox+16,oz+1.5)}
+function bStore(){const g=G.store,r=Z.store,n=n_('store');clear(g);
+ for(let i=0;i<5;i++){const x=r.x+22+i*17.5,z=r.cz;
+  if(i<n){bx(g,16,4.5,6,0xcfd3d6,x,0,z);bx(g,16.1,.6,6.1,0x3a7ac8,x,3.6,z);gable(g,7,1.4,17.5,0x7d858c,x,4.5,z).rotation.y=Math.PI/2;
+   for(const s of[-1,1]){const p=bx(g,15,.12,3.3,0x1f3a73,x,0,z+s*1.75);p.position.y=5.3;p.rotation.x=s*.38}
+   for(let k=0;k<3;k++)bx(g,3,3.2,.15,0x8a9096,x+(k-1)*5,0,z+3.05)}
+  else ghost(g,16,6,x,z,0xbfe0ff)}}
+function bShop(){const g=G.shop;clear(g);
+ for(let i=0;i<3;i++){const x=SHOPX[i],z0=SHOP_Z0;
+  if(i<n_('shop')){bx(g,34,7,18,0xf1efe6,x,0,z0);bx(g,34.6,.6,18.6,0xd23b2e,x,7,z0);
+   bx(g,10,3.2,.2,WIN,x-11,.6,z0-9.05);bx(g,10,3.2,.2,WIN,x+11,.6,z0-9.05);bx(g,6,3.2,.3,0x2b3138,x,0,z0-9.1);
+   bx(g,34,.35,2.4,0xd23b2e,x,3.9,z0-10.2);for(const sx of[-1,1])bx(g,.3,3.9,.3,0x777777,x+sx*16.5,0,z0-11.2);
+   sign(g,'RB FRESH MART','#d23b2e',18,3.4,x,9.2,z0-9.35,0,.2);bx(g,3,1.4,3,0xb7b7b0,x+9,7.6,z0+3)}
+  else ghost(g,34,18,x,z0,0xffd27a)}}
+function bVillage(){const g=G.village;clear(g);const cx=118,cz=SHOP_Z0+12;
+ // Separate roadside plaza outside the farm's six-acre production boundary.
+ const ground=new THREE.Mesh(new THREE.PlaneGeometry(92,70),M(0x9eaa85));ground.rotation.x=-Math.PI/2;ground.position.set(cx,.045,cz);g.add(ground);
+ const pave=new THREE.Mesh(new THREE.PlaneGeometry(48,31),M(0xc8c2b4));pave.rotation.x=-Math.PI/2;pave.position.set(cx,.075,cz+4);g.add(pave);
+ // Four independently rentable shop units.
+ const v=S.village||{occupiedShops:3,totalShops:4};for(let i=0;i<4;i++){const x=cx-29+i*19,z=cz-19;const wall=[0xe9dfc9,0xd8e5dc,0xe8d8c7,0xd8dfeb][i];bx(g,15,4.8,9,wall,x,0,z);bx(g,15.5,.45,9.5,[0x3b7658,0x2f7191,0x9a6c43,0x8a5a87][i],x,4.8,z);bx(g,5,2.5,.2,WIN,x,0.6,z-4.62);bx(g,3,2.5,.25,0x65452f,x,0,z-4.7);sign(g,'RENTAL SHOP '+(i+1),'#365a49',9,1.4,x,6.2,z-4.8,0,.12);if(i>=v.occupiedShops){const tag=sign(g,'AVAILABLE','#4b5662',7,1,x,3.4,z+4.8,0,.08);}}
+ // Owner-operated café with shaded outdoor gathering tables.
+ const fx=cx+7,fz=cz+18;bx(g,22,5.2,13,0xf1e5d0,fx,0,fz);bx(g,22.5,.5,13.5,0x8a4b32,fx,5.2,fz);gable(g,16,3.1,23,0x6d3c2c,fx,5.7,fz).rotation.y=Math.PI/2;bx(g,8,2.8,.2,WIN,fx-5,.5,fz-6.65);bx(g,4,2.7,.25,0x5b3a2b,fx+5,0,fz-6.7);sign(g,'VILLAGE LOUNGE CAFE','#8a4b32',16,2.3,fx,7.4,fz-6.9,0,.15);
+ for(const [x,z,c] of [[cx-9,cz+8,0xd23b2e],[cx-1,cz+8,0xf0b429],[cx+7,cz+8,0x2e7bd2],[cx+15,cz+8,0x2fa36b]]){umbrella(g,x,z,c);bx(g,3.2,.5,1.2,0x7b5738,x,.7,z+2.3);for(const dx of[-1.8,1.8])bx(g,.2,.7,.2,0x4c3828,x+dx,.15,z+2.3)}
+ for(const [x,z] of [[cx-39,cz-25],[cx+39,cz-25],[cx-39,cz+27],[cx+39,cz+27],[cx-15,cz+28],[cx+27,cz+27]])tree(g,x,z,1.2);
+ // Small processing unit is separated from food seating by a planted buffer.
+ const px=cx+44,pz=cz+3;
+ // Open-front, roofless cutaway so the player can actually see the production line from the plant camera.
+ bx(g,19,.3,13,0xd8dfda,px,.15,pz);bx(g,19,.45,.45,0x3e7192,px,5.5,pz+6.25);bx(g,.45,5.5,13,0xe0e4df,px-9.25,2.75,pz);bx(g,.45,5.5,13,0xe0e4df,px+9.25,2.75,pz);bx(g,19,5.5,.45,0xe0e4df,px,2.75,pz+6.25);sign(g,'RB DAIRY & WATER PLANT','#24536c',16,2,px,7.5,pz-6.9,0,.15);bx(g,4,2.6,.25,0x65452f,px,0,pz-6.7);
+ // Clearly visible production equipment: milk tank, water tank, stainless filling line and bottle rows.
+ for(const [dx,dz,col] of [[-5,1.5,0xdce7ed],[3,1.5,0x77b8d9]]){const tank=new THREE.Mesh(new THREE.CylinderGeometry(2.1,2.1,4.3,16),M(col));tank.position.set(px+dx,2.25,pz+dz);g.add(tank);const cap=new THREE.Mesh(new THREE.CylinderGeometry(2.1,2.1,.22,16),M(0x4b7890));cap.position.set(px+dx,4.48,pz+dz);g.add(cap)}
+ bx(g,7,.65,2.1,0x7c8990,px,1.15,pz-2.1);for(let i=0;i<8;i++){const bottle=new THREE.Mesh(new THREE.CylinderGeometry(.23,.28,.9,8),M(i%2?0x9bd6ef:0xf2f4f6));bottle.position.set(px-3.1+i*.88,1.95,pz-2.1);g.add(bottle)}sign(g,'MILK + WATER BOTTLING LINE','#24536c',14,1.4,px,5.1,pz+4.9,0,.1);
+ sign(g,'RB VILLAGE LOUNGE & SHOPS','#345c3e',23,2.5,cx,8.8,cz-30,0,.2);
+}
+let tourLbl=null,tourBeacon=null;
+function tourStatus(){const t=S.tourism||{};if(!t.built)return 'NOT BUILT · open Operations tab';if(!t.license)return 'Built · request licence';if(t.booking)return 'Occupied · '+t.booking.guests+' guest(s)';return 'Open · awaiting bookings'}
+function updTourLabel(){if(tourLbl&&tourLbl.userData.s!==tourStatus())setLabel(tourLbl,'RB Farm Stay',tourStatus())}
+function bTour(){const g=G.tour;clear(g);tourLbl=null;tourBeacon=null;const t=S.tourism||{};
+ bx(g,TOURP.w,.25,TOURP.h,0x9c8a6c,TX,0,TZ);
+ if(!t.built){
+  const geo=new THREE.BoxGeometry(20,4.6,13),box=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0x7fe3a0,transparent:true,opacity:.28,depthWrite:false}));box.position.set(TX,2.55,TZ);g.add(box);
+  const ed=new THREE.LineSegments(new THREE.EdgesGeometry(geo),new THREE.LineBasicMaterial({color:0xc8ffb0}));ed.position.set(TX,2.55,TZ);g.add(ed);
+  tourBeacon=new THREE.Mesh(new THREE.CylinderGeometry(.7,.7,34,10),new THREE.MeshBasicMaterial({color:0xffd24a,transparent:true,opacity:.3,depthWrite:false}));tourBeacon.position.set(TX,17,TZ);g.add(tourBeacon);
+  bx(g,.3,3,.3,0x5a3d22,TX-5,.25,TZ+8.8);bx(g,.3,3,.3,0x5a3d22,TX+5,.25,TZ+8.8);sign(g,'RB FARM STAY · PLOT RESERVED','#8a4e2d',12,2.2,TX,2.9,TZ+8.8,0,.35)
+ }else{
+  // Existing guest cottage remains in its original position. New compact buildings fit inside the same guest-stay plot.
+  bx(g,20,4.2,13,0xe7d8b5,TX,.25,TZ);bx(g,20.6,.5,13.6,0x486b45,TX,4.45,TZ);gable(g,15,3.4,21.5,0x75472f,TX,4.95,TZ).rotation.y=Math.PI/2;
+  for(let i=0;i<4;i++){bx(g,2.2,1.7,.18,WIN,TX-7.5+i*5,1.1,TZ+6.55);bx(g,2.2,1.7,.18,WIN,TX-7.5+i*5,1.1,TZ-6.55)}
+  bx(g,3,2.6,.25,0x4c3325,TX,.25,TZ+6.6);bx(g,20,.25,2.4,0x9c7a50,TX,.25,TZ+7.9);
+  bx(g,.3,3.4,.3,0x5a3d22,TX-5.5,.25,TZ+9);bx(g,.3,3.4,.3,0x5a3d22,TX+5.5,.25,TZ+9);
+  // Small auxiliary facilities: the layout is additive; no original zone, road, pond or building is moved.
+  const mini=(x,z,w,d,wall,roof,title,bg)=>{bx(g,w,2.5,d,wall,x,.25,z);bx(g,w+.25,.28,d+.25,roof,x,2.78,z);bx(g,Math.min(1.1,w*.22),1.25,.12,WIN,x,1.05,z+d/2+.07);sign(g,title,bg,Math.min(8,w*1.55),.9,x,3.65,z+d/2+.16,0,.08)};
+  mini(TX-5.6,TZ+7.6,4.6,2.0,0xf1e6d0,0x8a4938,'RECEPTION','#245a36');
+  mini(TX+5.6,TZ+7.6,4.6,2.0,0xe9d7b9,0xb44b35,'FARM CAFE','#a44b2c');
+  mini(TX-5.6,TZ-7.6,4.6,2.0,0xe5d9c1,0x6b7d46,'FAMILY SUITE','#425f37');
+  mini(TX+5.6,TZ-7.6,4.6,2.0,0xf0e2c9,0x526f9c,'PREMIUM STAY','#345478');
+  mini(TX-11.1,TZ,1.45,3.4,0xe5d8bd,0x6f8b53,'ROOMS','#42623b');
+  mini(TX+11.1,TZ,1.45,3.4,0xe5d8bd,0x6f8b53,'LAUNDRY','#42623b');
+  // Guest activity and shuttle areas are represented by clear, small ground signs to avoid overcrowding the plot.
+  bx(g,4.2,.12,1.2,0x79a96a,TX-5.5,.27,TZ+4.9);bx(g,4.2,.12,1.2,0x79a96a,TX+5.5,.27,TZ+4.9);
+  sign(g,'FARM TOURS · FISHING · PICNIC','#315d39',10,.85,TX,1.1,TZ+9.05,0,.06);
+  sign(g,'GUEST SHUTTLE & PARKING','#355f8a',10,.85,TX,1.1,TZ-9.05,0,.06);
+  palm(g,TX-9.4,TZ-4.8,5.5);palm(g,TX+9.4,TZ-4.8,5.5)
+ }
+ tourLbl=mkLabel('RB HOSPITALITY COMPLEX',t.built?'All facilities open · 0 build cost':tourStatus(),TX,t.built?15:14,TZ,g)}
+const B={fishery:bFish,agri:bAgri,dairy:bDairy,poultry:bPoul,feed:bFeed,util:bUtil,admin:bAdmin,store:bStore};
+function rebuild(k){if(k=='shop')bShop();else if(k=='tour')bTour();else if(k=='village')bVillage();else B[EZ[k]]()}
+
+function updVis(){vis.cm.forEach((m,i)=>{const u=S.u.crop[i];if(!u)return;const f=u.p<0?0:u.p/E.crop.cyc;vis.cr[i].scale.y=.25+1.5*f;m.color.setHSL(.3-.18*f*f,.55,.36)});updTourLabel()}
+
+const C1=new THREE.Color(),C2=new THREE.Color(0x9cc4e4),C3=new THREE.Color(0x070b16),C4=new THREE.Color(0xe39a6a);
+function applyLight(){const h=(S.t%1440)/60,e=Math.sin((h-6)/12*Math.PI),d=Math.max(0,e),az=(h-6)/12*Math.PI;
+ sun.position.set(-Math.cos(az)*150,15+d*130,50);sun.intensity=.06+.95*d;sun.color.setHex(d<.25?0xffc58a:0xfff2d8);hemi.intensity=.16+.5*d;
+ C1.copy(C3).lerp(C2,Math.min(1,d*2.2));if(d<.3&&e>-.25)C1.lerp(C4,.3*(1-d/.3));scene.background.copy(C1);scene.fog.color.copy(C1);WIN.emissiveIntensity=d<.3?2.2:.3}
+/* --- camera controls --- */
+const tgt=new THREE.Vector3(0,0,22);let th=.12,ph=.9,rad=300,goal=null,radGoal=300,dr=null;
+function flyTo(x,z,r){goal=new THREE.Vector3(x,0,z);radGoal=Math.max(30,Math.min(560,r))}
+function zoomBy(factor){rad=Math.max(30,Math.min(560,rad*factor));radGoal=rad;goal=null}
+
+function cam(){camera.position.set(tgt.x+rad*Math.sin(ph)*Math.sin(th),rad*Math.cos(ph),tgt.z+rad*Math.sin(ph)*Math.cos(th));camera.lookAt(tgt)}
+const ray=new THREE.Raycaster(),mv=new THREE.Vector2();
+function hit(e){const b=cv.getBoundingClientRect();mv.set((e.clientX-b.left)/b.width*2-1,-(e.clientY-b.top)/b.height*2+1);ray.setFromCamera(mv,camera);const h=ray.intersectObjects(zp)[0];return h&&h.object.userData.z}
+function select(k){sel=k;const r=k=='tour'?TOURP:Z[k];hl.visible=true;hl.position.set(r.cx,2,r.cz);hl.scale.set(r.w,1,r.h);goal=new THREE.Vector3(r.cx,0,r.cz);radGoal=Math.min(rad,150);tab=0;ui()}
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('pointerdown',e=>{e.preventDefault();dr={x:e.clientX,y:e.clientY,b:e.button,m:0,id:e.pointerId};goal=null;try{cv.setPointerCapture(e.pointerId)}catch(_){}});
+cv.addEventListener('pointermove',e=>{
+ if(dr){if(dr.id!==undefined&&e.pointerId!==dr.id)return;const dx=e.clientX-dr.x,dy=e.clientY-dr.y;dr.m+=Math.abs(dx)+Math.abs(dy);dr.x=e.clientX;dr.y=e.clientY;
+  if(dr.b===0&&!e.shiftKey){th-=dx*.006;ph=Math.min(1.45,Math.max(.25,ph-dy*.006))}
+  else{const s=rad*.0016;tgt.x+=-dx*s*Math.cos(th)-dy*s*Math.sin(th);tgt.z+=dx*s*Math.sin(th)-dy*s*Math.cos(th);tgt.x=Math.max(-230,Math.min(230,tgt.x));tgt.z=Math.max(-170,Math.min(230,tgt.z))}return}
+ const k=hit(e),t=$('tip');if(k){t.style.display='block';t.innerHTML=k=='tour'?'<b>RB Farm Stay</b> — guest cottage plot<br>'+tourStatus():'<b>'+ZN[k]+'</b> — '+CFG.acres[k]+' acres ('+Math.round(CFG.acres[k]*ACRE).toLocaleString()+' m²)<br>'+(ZE[k]?stat(ZE[k]):'Head office, accounts & main gate')}else t.style.display='none'});
+function endDrag(e){if(dr&&(!dr.id||e.pointerId===dr.id)&&dr.m<5&&dr.b===0){const k=hit(e);if(k)select(k)}dr=null}
+cv.addEventListener('pointerup',endDrag);cv.addEventListener('pointercancel',()=>{dr=null});cv.addEventListener('lostpointercapture',()=>{dr=null});
+cv.addEventListener('wheel',e=>{e.preventDefault();zoomBy(1+Math.sign(e.deltaY)*.1)},{passive:false});
+function resize(){const v=$('view');renderer.setSize(v.clientWidth,v.clientHeight,false);camera.aspect=v.clientWidth/v.clientHeight;camera.updateProjectionMatrix()}
+addEventListener('resize',resize);
+
+let last=0,simErrorShown=false;function loop(t){t*=.001;const dt=Math.min(.25,t-last);last=t;try{tickTime(dt)}catch(err){S.speed=0;renderSpeed();if(!simErrorShown){simErrorShown=true;note('bad','Simulation paused safely','A simulation step hit an error, so the clock was paused instead of freezing the whole game. Save your progress and reload; details: '+String(err&&err.message||err).slice(0,180),0);save();ui();hud();}}applyLight();vis.aer.forEach(a=>a.rotation.x=t*3);
+ vis.cows.forEach((c,i)=>{c.position.x=c.userData.bx+Math.sin(t*.25+i*1.7)*1.8;c.rotation.y=Math.cos(t*.25+i*1.7)>0?0:Math.PI});
+ waterTex.offset.set(t*.004,t*.002);
+ const gm=(S.over||modal||!S.speed)?0:dt*TIME.speeds[S.speed]*TIME.base/60;
+ spawnCustomers(gm);villageFootTraffic(dt);ambientTraffic(dt);runVisits();stepActors(dt,t);
+ {const r=Z.agri,c=Math.cos(t*.15);trac.position.set(r.x+8+(Math.sin(t*.15)+1)/2*(r.w-16),0,ZAB-.2);trac.rotation.y=c>0?0:Math.PI}
+ if(tourBeacon)tourBeacon.material.opacity=.22+.14*Math.sin(t*3);
+ if(goal){tgt.lerp(goal,.07);rad+=(radGoal-rad)*.07;if(tgt.distanceTo(goal)<.5)goal=null}
+ cam();renderer.render(scene,camera);requestAnimationFrame(loop)}
+
+/* ===================== BOOT ===================== */
+const savedState=load();S=Object.assign(fresh(),savedState||{});
+// Save migration: keep older saved games numerically safe and preserve their progress.
+S.cash=Number.isFinite(Number(S.cash))?Number(S.cash):CFG.cash;S.loan=Math.max(0,Number(S.loan)||0);S.qrev=Number(S.qrev)||0;S.qcost=Number(S.qcost)||0;S.capex=Number(S.capex)||0;S.dayDone=Math.max(0,Number(S.dayDone)||0);S.t=Math.max(0,Number(S.t)||0);S.week=Math.max(1,Number(S.week)||1);S.hist=Array.isArray(S.hist)?S.hist.filter(Number.isFinite):[S.cash];S.rep=Object.assign({r:{},c:{}},S.rep||{});S.rep.r=S.rep.r||{};S.rep.c=S.rep.c||{};S.cool=S.cool||{};S.fl=S.fl||{};S.contracts=Array.isArray(S.contracts)?S.contracts:[];S.offers=Array.isArray(S.offers)?S.offers:[];S.notes=Array.isArray(S.notes)?S.notes:[];S.u=S.u||fresh().u;
+if(!S.u)S.u=fresh().u;
+S.inv=Object.assign({fish:0,veg:0,milk:0,egg:0,eggTray:0,frozenFish:0,feed:2000},S.inv||{});
+S.pr=Object.assign({fish:175,veg:45,milk:75,egg:11,eggTray:420,frozenFish:225,feed:50,raw:34,gas:45},S.pr||{});
+S.solar=Object.assign({arrays:0,price:18,capacityPerArray:80,costPerArrayDay:250,lifeSales:0,lifeCosts:0,energyUsed:0},S.solar||{});S.ai=Object.assign({energy:1,accountant:1,autoPrice:1,costGuard:1},S.ai||{});S.solar.arrays=Math.max(0,Math.min(8,Number(S.solar.arrays)||0));S.solar.price=Math.max(1,Number(S.solar.price)||18);S.feedRawKg=Math.max(0,Number(S.feedRawKg)||0);S.organicWasteKg=Math.max(0,Number(S.organicWasteKg)||0);S.bioGasUsed=Math.max(0,Number(S.bioGasUsed)||0);S.loanRepayments=Array.isArray(S.loanRepayments)?S.loanRepayments:[];S.loanPrincipalRepaidTotal=Math.max(Number(S.loanPrincipalRepaidTotal)||0,S.loanRepayments.reduce((n,x)=>n+(Number(x.amount)||0),0));S.packaging=Object.assign({eggTrays:0,fishPacks:0,processingCost:0,packagingCost:0},S.packaging||{});for(const k of ['eggTrays','fishPacks','processingCost','packagingCost'])S.packaging[k]=Math.max(0,Number(S.packaging[k])||0);
+if(!Array.isArray(S.u.shop))S.u.shop=[];
+if(S.u.shop.length===0){S.u.shop.push({p:0,y:1});S.capex=(S.capex||0)+E.shop.cap;S.fl=S.fl||{};S.fl.shopIntro=0;}
+if(!Array.isArray(S.salesLog))S.salesLog=[];
+if(!Array.isArray(S.chat))S.chat=[];S.tourism=Object.assign({built:0,license:0,guests:0,reviews:[],income:0},S.tourism||{});S.tourism.built=S.tourism.built?1:0;S.tourism.license=S.tourism.license?1:0;S.tourism.guests=Number(S.tourism.guests)||0;S.tourism.income=Number(S.tourism.income)||0;S.tourism.reviews=Array.isArray(S.tourism.reviews)?S.tourism.reviews:[];S.approvals=Array.isArray(S.approvals)?S.approvals:[];S.monthGross=Number(S.monthGross)||0;S.legal=Object.assign({vatAccrued:0,taxAccrued:0,vatSavings:0,taxSavings:0,operatingSavings:0,healthIncidentsPrevented:0},S.legal||{});ensureBusinessData();initTeam();
+// User-requested free hospitality launch: every added facility is available immediately, with no capex/cash deduction.
+S.hospitality.built=Object.assign({},S.hospitality.built||{});for(const hk of Object.keys(HOSP))S.hospitality.built[hk]=1;S.tourism.license=1;S.tourism.built=1;
+// One-time migration: remove historical principal repayments from quarterly profit costs (cash/loan history stays intact).
+if(!S.principalAccountingV1){const quarterStart=S.week-((S.week-1)%CFG.taxEvery);const quarterPrincipal=S.loanRepayments.filter(x=>Number(x.week)>=quarterStart&&Number(x.week)<=S.week).reduce((n,x)=>n+(Number(x.amount)||0),0);S.qcost=Math.max(0,(Number(S.qcost)||0)-quarterPrincipal);S.principalAccountingV1=1;}
+// One-time migration reduces previously saved simulated accruals to the new rates without repeatedly scaling them.
+if(!S.rateMigrationV2){S.legal.vatAccrued=Math.max(0,Number(S.legal.vatAccrued)||0)*(0.002/0.03);S.legal.taxAccrued=Math.max(0,Number(S.legal.taxAccrued)||0)*(0.002/0.225);S.rateMigrationV2=1;}
+S.dailyGrossSales=Number(S.dailyGrossSales)||0;S.dailyVatAccrued=Number(S.dailyVatAccrued)||0;
+// Clarify ledger items that may remain from a saved game played before the 0.2% VAT / 99%-lower hospitality update. Historical amounts are preserved.
+function relabelLegacyLedger(book){if(!book||!book.c)return;for(const k of Object.keys(book.c)){if(/Simulated VAT accrued \(3%/.test(k)){book.c['Historical VAT accrued under previous 3% rule (not charged by current version)']=(book.c['Historical VAT accrued under previous 3% rule (not charged by current version)']||0)+book.c[k];delete book.c[k];}else if(/^Hospitality operating cost — (Standard room lodge \(4 rooms\)|Premium farm cottages \(2 units\)|Family suite \(1 unit\))$/.test(k)){const nk='Historical pre-update hospitality cost — '+k.replace('Hospitality operating cost — ','');book.c[nk]=(book.c[nk]||0)+book.c[k];delete book.c[k];}}}
+relabelLegacyLedger(S.rep);relabelLegacyLedger(S.prev);
+// Save-compatible fix: extend only active vegetable contracts that cannot be supplied before the next harvest.
+for(const c of S.contracts){
+ if(c.ty==='buy'&&c.item==='veg'&&!c.done&&S.inv.veg<c.qty){
+  c.due=Math.max(c.due,S.dayDone+vegHarvestDays()+2);
+ }
+}
+function showSocialReview(){const box=$('socialTicker');if(!box)return;const reviews=(S.tourism&&S.tourism.reviews)||[];const posts=[{i:'f',t:'RB Group farm update: fresh produce, fish ponds and greener farming.'},{i:'◎',t:'A peaceful day among the fields 🌿'},{i:'X',t:'Farm loop: produce → feed/compost → livestock → market.'},{i:'SMS',t:'Visitor tip: ask about farm tours and guest stays.'}];if(reviews.length)posts.unshift({i:'★',t:reviews[0].author+': “'+reviews[0].text+'”'});const item=posts[(Math.floor(Date.now()/5200))%posts.length];box.innerHTML='<div class=social-bubble><span class=social-icon>'+item.i+'</span><span class=social-copy>'+item.t+'</span></div>'}
+function supermarketManagerReport(intro){if(!S.u.shop.length)return;const low=S.cash<500000;if(intro)note('info','RB Fresh Mart opened','Your first supermarket is ready without deducting its setup cost from starting cash. Its setup is recorded as capital expense.',0);else if(low&&cdn('shopcash',14))note('warn','Supermarket manager','Retail cash reserve is getting tight ('+BDT(S.cash)+'). Protect payroll and feed purchases before expanding.',0);else if(S.dayDone%28===0)note('info','Supermarket manager','Weekly retail margin has been added to Finance. Review stock and keep cash reserved for farm operations.',0)}
+if(window.matchMedia('(max-width:760px)').matches){$('app').classList.add('panel-hidden');$('panelBtn').textContent='📋 Open panel'}for(const k in B)B[k]();bShop();bTour();bVillage();resize();updVis();$('mav').innerHTML=AV;renderSpeed();showSocialReview();setInterval(showSocialReview,5200);if(n_('shop')&&!S.fl.shopIntro){S.fl.shopIntro=1;supermarketManagerReport(true);save();}
+if(!S.notes.length)note('info','Good morning','I am '+CFG.manager+', your farm manager. I will report everything that matters here and bring you the decisions.');
+save();ui();hud();setInterval(hud,250);setInterval(()=>{if(!modal)ui()},3000);setInterval(save,5000);window.addEventListener('pagehide',save);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')save()});
+if(!S.seen)showHelp();requestAnimationFrame(loop);
+</script></body></html>
